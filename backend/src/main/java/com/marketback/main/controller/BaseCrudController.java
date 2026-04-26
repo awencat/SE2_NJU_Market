@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class BaseCrudController<T> {
 
@@ -38,6 +39,19 @@ public abstract class BaseCrudController<T> {
         }
         List<T> list = service.list(wrapper);
         return ApiResponse.success(list);
+    }
+
+    @PostMapping("/search")
+    public ApiResponse<?> search(@RequestBody(required = false) Map<String, Object> filters) {
+        QueryWrapper<T> wrapper = new QueryWrapper<>();
+        if (filters != null) {
+            filters.forEach((key, value) -> {
+                if (value != null && !"".equals(value)) {
+                    wrapper.eq(toSnakeCase(key), value);
+                }
+            });
+        }
+        return ApiResponse.success(service.list(wrapper));
     }
 
     @GetMapping("/{id}")
@@ -76,5 +90,9 @@ public abstract class BaseCrudController<T> {
             return ApiResponse.fail("delete failed");
         }
         return ApiResponse.success("deleted", true);
+    }
+
+    private String toSnakeCase(String value) {
+        return value.replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase();
     }
 }
