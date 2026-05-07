@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController extends BaseCrudController<User> {
 
     public UserController(UserService userService) {
-        super(userService, "userId");
+        super(userService, "userId", User.class);
     }
 }

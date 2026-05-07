@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderEntityController extends BaseCrudController<OrderEntity> {
 
     public OrderEntityController(OrderEntityService orderEntityService) {
-        super(orderEntityService, "orderId");
+        super(orderEntityService, "orderId", OrderEntity.class);
     }
 }

@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class GoodController extends BaseCrudController<Good> {
 
     public GoodController(GoodService goodService) {
-        super(goodService, "goodId");
+        super(goodService, "goodId", Good.class);
     }
 }

@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class GoodImageController extends BaseCrudController<GoodImage> {
 
     public GoodImageController(GoodImageService goodImageService) {
-        super(goodImageService, "imageId");
+        super(goodImageService, "imageId", GoodImage.class);
     }
 }

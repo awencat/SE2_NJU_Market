@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class RatingController extends BaseCrudController<Rating> {
 
     public RatingController(RatingService ratingService) {
-        super(ratingService, "ratingId");
+        super(ratingService, "ratingId", Rating.class);
     }
 }

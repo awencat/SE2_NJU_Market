@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class CommentController extends BaseCrudController<Comment> {
 
     public CommentController(CommentService commentService) {
-        super(commentService, "commentId");
+        super(commentService, "commentId", Comment.class);
     }
 }

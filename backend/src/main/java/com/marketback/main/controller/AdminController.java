@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminController extends BaseCrudController<Admin> {
 
     public AdminController(AdminService adminService) {
-        super(adminService, "adminId");
+        super(adminService, "adminId", Admin.class);
     }
 }

@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class FavoriteController extends BaseCrudController<Favorite> {
 
     public FavoriteController(FavoriteService favoriteService) {
-        super(favoriteService, "favoriteId");
+        super(favoriteService, "favoriteId", Favorite.class);
     }
 }

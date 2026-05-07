@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class ReportController extends BaseCrudController<Report> {
 
     public ReportController(ReportService reportService) {
-        super(reportService, "reportId");
+        super(reportService, "reportId", Report.class);
     }
 }
