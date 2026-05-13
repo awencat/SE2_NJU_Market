@@ -14,4 +14,6 @@ public class AuthResponse {
     private String email;
 
     private String campus;
+
+    private String avatarUrl;
 }

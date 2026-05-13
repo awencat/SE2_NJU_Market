@@ -30,6 +30,7 @@ public class Good implements Serializable {
 
     private String status;
 
+    @TableField("`condition`")
     private String condition;
 
     private Integer viewCount;

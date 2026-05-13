@@ -9,7 +9,22 @@ async function request(path, options = {}) {
     ...options,
   })
 
-  const data = await response.json()
+  let data
+  try {
+    const contentType = response.headers.get('content-type')
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json()
+    } else {
+      const text = await response.text()
+      throw new Error(text || `HTTP error! status: ${response.status}`)
+    }
+  } catch (parseError) {
+    if (parseError instanceof SyntaxError) {
+      throw new Error('服务器响应格式错误')
+    }
+    throw parseError
+  }
+
   if (!response.ok || data.success === false) {
     throw new Error(data.message || 'Request failed')
   }
@@ -64,3 +79,19 @@ export function loginUser(payload) {
     body: JSON.stringify(payload),
   })
 }
+export async function uploadUserAvatar(userId, file) {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const response = await fetch(`/api/users/${userId}/avatar`, {
+    method: 'POST',
+    body: formData,
+  })
+
+  const data = await response.json()
+  if (!response.ok || data.success === false) {
+    throw new Error(data.message || '头像上传失败')
+  }
+  return data
+}
+

@@ -49,7 +49,7 @@ async function submitLogin() {
     persistUser(result.data)
     message.value = `欢迎回来，${result.data.username}`
     loginForm.value.password = ''
-    router.replace('/CrudDashboard')
+    router.replace('/FrontPage')
   } catch (error) {
     message.value = error.message || '登录失败'
   } finally {
