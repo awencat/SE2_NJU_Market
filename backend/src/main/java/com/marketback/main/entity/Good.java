@@ -40,4 +40,8 @@ public class Good implements Serializable {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
+
+    @TableField(exist = false)
+    private String sellerName;
 }
+

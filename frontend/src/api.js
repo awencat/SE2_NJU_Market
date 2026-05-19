@@ -38,6 +38,12 @@ export function fetchList(resource) {
 export function fetchById(resource, id) {
   return request(`/${resource}/${id}`)
 }
+export function fetchPage(payload) {
+  return request(`/goods/listPage`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
 
 export function createRecord(resource, payload) {
   return request(`/${resource}`, {

@@ -19,6 +19,15 @@ function init() {
     user.value = { name: '未登录', email: '-' }
   }
 }
+function avatarUrl() {
+  const image = user.value.image || user.value.avatar || user.value.avatarUrl
+  if (!image) return ''
+  if (/^https?:\/\//.test(image)) return image
+  if (image.startsWith('/uploads/')) return `http://localhost:8080${image}`
+  if (image.startsWith('/')) return image
+  return `http://localhost:8095/heads/${image}`
+}
+
 
 function goToUpdate() {
   router.push('/update')
@@ -44,7 +53,7 @@ onMounted(() => {
 
       <el-descriptions-item label="头像">
         <div class="center-text">
-          <el-avatar :size="60" :src="user.avatar" />
+          <el-avatar :size="60" :src="avatarUrl()" />
         </div>
       </el-descriptions-item>
 

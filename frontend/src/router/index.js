@@ -6,14 +6,11 @@ import PlaceholderPage from '../components/PlaceholderPage.vue'
 import CrudDashboard from '../components/CrudDashboard.vue'
 import HomePage from '../components/Homepage.vue'
 import UpdatePage from '../components/update.vue'
+import DailyShop from '../shops/DailyShop.vue'
+
 
 const placeholderRoutes = [
-  {
-    path: '/DailyShop',
-    menuIndex: '/DailyShop',
-    title: '日用商城',
-    description: '日用百货分类页还未实现，当前先保留路由入口。',
-  },
+
   {
     path: '/VideoShop',
     menuIndex: '/VideoShop',
@@ -74,17 +71,27 @@ const routes = [
           menuIndex: '/FrontPage',
         }
       },
+      {
+        path: '/HomePage',
+        name: 'HomePage',
+        component: HomePage,
+        meta: {
+          title: '个人主页',
+          menuIndex: '/FrontPage',
+        },
+      },
+      {
+        path: '/DailyShop',
+        name: 'DailyShop',
+        component: DailyShop,
+        meta: {
+          title: '日用商城',
+          menuIndex: '/FrontPage',
+        },
+      },
     ],
   },
-  {
-    path: '/HomePage',
-    name: 'HomePage',
-    component: HomePage,
-    meta: {
-      title: '个人主页',
-      menuIndex: '/FrontPage',
-    }
-  },
+
   {
     path: '/update',
     name: 'UpdatePage',

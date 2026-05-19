@@ -75,16 +75,15 @@ async function logout() {
       <el-menu-item index="/PetShop" @click="go('/PetShop')">萌宠</el-menu-item>
     </el-sub-menu>
 
-    <el-sub-menu index="user-center">
-      <template #title>个人中心</template>
-      <el-menu-item index="/HomePage" @click="go('/HomePage')">个人主页</el-menu-item>
-      <el-menu-item index="/update" @click="go('/update')">修改资料</el-menu-item>
-      <el-menu-item index="logout" @click="logout">退出登录</el-menu-item>
-    </el-sub-menu>
-
     <el-menu-item index="/GoodsManager" @click="go('/GoodsManager')">商品管理</el-menu-item>
     <el-menu-item index="/UserManager" @click="go('/UserManager')">用户管理</el-menu-item>
     <el-menu-item index="/CrudDashboard" @click="go('/CrudDashboard')">数据控制台</el-menu-item>
+
+    <el-sub-menu index="user-center">
+      <template #title>个人中心</template>
+      <el-menu-item index="/HomePage" @click="go('/HomePage')">个人主页</el-menu-item>
+      <el-menu-item index="logout" @click="logout">退出登录</el-menu-item>
+    </el-sub-menu>
 
     <div class="header-user">
       <span>欢迎，{{ displayName() }}</span>
