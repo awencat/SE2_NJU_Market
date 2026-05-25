@@ -43,5 +43,11 @@ public class Good implements Serializable {
 
     @TableField(exist = false)
     private String sellerName;
+
+    @TableField(exist = false)
+    private String sellerPhone;
+
+    @TableField(exist = false)
+    private String sellerEmail;
 }
 

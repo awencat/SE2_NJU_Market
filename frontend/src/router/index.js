@@ -7,10 +7,9 @@ import CrudDashboard from '../components/CrudDashboard.vue'
 import HomePage from '../components/Homepage.vue'
 import UpdatePage from '../components/update.vue'
 import DailyShop from '../shops/DailyShop.vue'
-
+import GoodDetail from '../shops/GoodDetail.vue'
 
 const placeholderRoutes = [
-
   {
     path: '/VideoShop',
     menuIndex: '/VideoShop',
@@ -54,9 +53,7 @@ const routes = [
     path: '/',
     name: 'login',
     component: Login,
-    meta: {
-      title: '登录',
-    },
+    meta: { title: '登录' },
   },
   {
     path: '/FrontPage',
@@ -69,7 +66,7 @@ const routes = [
         meta: {
           title: '南京大学校园二手交易平台',
           menuIndex: '/FrontPage',
-        }
+        },
       },
       {
         path: '/HomePage',
@@ -89,9 +86,17 @@ const routes = [
           menuIndex: '/FrontPage',
         },
       },
+      {
+        path: '/goods/:id',
+        name: 'GoodDetail',
+        component: GoodDetail,
+        meta: {
+          title: '商品详情',
+          menuIndex: '/FrontPage',
+        },
+      },
     ],
   },
-
   {
     path: '/update',
     name: 'UpdatePage',
@@ -99,7 +104,7 @@ const routes = [
     meta: {
       title: '修改资料',
       menuIndex: '/update',
-    }
+    },
   },
   ...placeholderRoutes.map((item) => ({
     path: item.path,
@@ -150,5 +155,3 @@ router.beforeEach((to, from, next) => {
 })
 
 export default router
-
-

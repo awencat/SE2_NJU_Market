@@ -1,11 +1,11 @@
-spring:
+﻿spring:
   application:
     name: nju-market
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/nju_market?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
-    username: root
-    password: root
+    url: ${DB_URL:jdbc:mysql://localhost:3306/nju_market?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
 
 server:
   port: 8080
@@ -21,3 +21,4 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto
+

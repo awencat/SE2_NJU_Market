@@ -34,7 +34,7 @@ public class GoodController extends BaseCrudController<Good> {
     @PostMapping("/listPage")
     public ApiResponse<Map<String, Object>> listPage(@RequestBody QueryPageParam query) {
         Map<String, Object> param = query.getParam();
-        System.out.println("我在这里！！");
+        System.out.println("鎴戝湪杩欓噷锛侊紒");
         Integer goodId = (Integer) param.get("goodId");
         String title = (String) param.get("title");
         String category = (String) param.get("category");
@@ -85,8 +85,10 @@ public class GoodController extends BaseCrudController<Good> {
                 User seller = userMap.get(good.getSellerId());
                 if (seller != null) {
                     good.setSellerName(seller.getUsername());
+                    good.setSellerPhone(seller.getPhone());
+                    good.setSellerEmail(seller.getEmail());
                 } else {
-                    good.setSellerName("未知用户");
+                    good.setSellerName("鏈煡鐢ㄦ埛");
                 }
             }
         }

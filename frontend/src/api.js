@@ -38,8 +38,9 @@ export function fetchList(resource) {
 export function fetchById(resource, id) {
   return request(`/${resource}/${id}`)
 }
+
 export function fetchPage(payload) {
-  return request(`/goods/listPage`, {
+  return request('/goods/listPage', {
     method: 'POST',
     body: JSON.stringify(payload),
   })
@@ -85,6 +86,41 @@ export function loginUser(payload) {
     body: JSON.stringify(payload),
   })
 }
+
+export function purchaseGood(payload) {
+  return request('/orders/purchase', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function cancelOrder(orderId, buyerId) {
+  const query = buyerId ? `?buyerId=${encodeURIComponent(buyerId)}` : ''
+  return request(`/orders/${orderId}/cancel${query}`, {
+    method: 'POST',
+  })
+}
+
+export function fetchSellerOrders(sellerId) {
+  return request(`/orders/seller/${sellerId}`)
+}
+
+export function fetchBuyerOrders(buyerId) {
+  return request(`/orders/buyer/${buyerId}`)
+}
+
+export function fetchGoodComments(goodId) {
+  return request(`/comments/good/${goodId}`)
+}
+
+export function fetchGoodRatings(goodId) {
+  return request(`/ratings/good/${goodId}`)
+}
+
+export function fetchGoodRatingSummary(goodId) {
+  return request(`/ratings/good/${goodId}/summary`)
+}
+
 export async function uploadUserAvatar(userId, file) {
   const formData = new FormData()
   formData.append('file', file)
@@ -100,4 +136,3 @@ export async function uploadUserAvatar(userId, file) {
   }
   return data
 }
-
