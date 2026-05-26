@@ -10,6 +10,7 @@ import lombok.Data;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @TableName("good")
@@ -33,6 +34,7 @@ public class Good implements Serializable {
     @TableField("`condition`")
     private String condition;
 
+
     private Integer viewCount;
 
     @TableField(fill = FieldFill.INSERT)
@@ -49,5 +51,18 @@ public class Good implements Serializable {
 
     @TableField(exist = false)
     private String sellerEmail;
+
+    @TableField(exist = false)
+    private List<GoodImage> images;
+
+    @TableField(exist = false)
+    private String imageUrl;
+
+    @TableField(exist = false)
+    private String image;
+
+    @TableField(exist = false)
+    private String coverUrl;
 }
+
 

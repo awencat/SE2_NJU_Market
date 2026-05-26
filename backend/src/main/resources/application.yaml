@@ -14,6 +14,9 @@ market:
   avatar:
     upload-dir: D:/upload/avatar
     public-path: /uploads/avatars/
+  goods-image:
+    upload-dir: D:/upload/goods
+    public-path: /uploads/goods/
 
 mybatis-plus:
   configuration:
@@ -21,4 +24,5 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto
+
 

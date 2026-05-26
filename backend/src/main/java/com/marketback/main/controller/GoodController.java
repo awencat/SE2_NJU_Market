@@ -7,13 +7,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.marketback.main.common.ApiResponse;
 import com.marketback.main.controller.QueryPageParam;
 import com.marketback.main.entity.Good;
+import com.marketback.main.entity.GoodImage;
 import com.marketback.main.entity.User;
+import com.marketback.main.service.GoodImageService;
 import com.marketback.main.service.GoodService;
 import com.marketback.main.service.UserService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,11 +23,13 @@ public class GoodController extends BaseCrudController<Good> {
 
     private final GoodService goodService;
     private final UserService userService;
+    private final GoodImageService goodImageService;
 
-    public GoodController(GoodService goodService, UserService userService) {
+    public GoodController(GoodService goodService, UserService userService, GoodImageService goodImageService) {
         super(goodService, "goodId", Good.class);
         this.goodService = goodService;
         this.userService = userService;
+        this.goodImageService = goodImageService;
     }
 
     @PostMapping("/listPage")
@@ -89,6 +90,14 @@ public class GoodController extends BaseCrudController<Good> {
                 } else {
                     good.setSellerName("未知用户");
                 }
+            }
+            List<GoodImage> images = goodImageService.listByGoodId(good.getGoodId());
+            good.setImages(images);
+            if (!images.isEmpty()) {
+                String coverUrl = images.get(0).getImageUrl();
+                good.setImageUrl(coverUrl);
+                good.setImage(coverUrl);
+                good.setCoverUrl(coverUrl);
             }
         }
 

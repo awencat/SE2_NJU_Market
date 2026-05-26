@@ -11,9 +11,12 @@ import java.nio.file.Paths;
 public class WebMvcConfig implements WebMvcConfigurer {
 
     private final AvatarStorageProperties avatarStorageProperties;
+    private final GoodsImageStorageProperties goodsImageStorageProperties;
 
-    public WebMvcConfig(AvatarStorageProperties avatarStorageProperties) {
+    public WebMvcConfig(AvatarStorageProperties avatarStorageProperties,
+                        GoodsImageStorageProperties goodsImageStorageProperties) {
         this.avatarStorageProperties = avatarStorageProperties;
+        this.goodsImageStorageProperties = goodsImageStorageProperties;
     }
 
     @Override
@@ -23,8 +26,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addResourceHandler(publicPath + "**")
                 .addResourceLocations(uploadPath.toUri().toString());
 
-        Path goodsImagePath = Paths.get("uploads/goods").toAbsolutePath().normalize();
-        registry.addResourceHandler("/uploads/goods/**")
+        String goodsImagePublicPath = ensureTrailingSlash(goodsImageStorageProperties.getPublicPath());
+        Path goodsImagePath = Paths.get(goodsImageStorageProperties.getUploadDir()).toAbsolutePath().normalize();
+        registry.addResourceHandler(goodsImagePublicPath + "**")
                 .addResourceLocations(goodsImagePath.toUri().toString());
     }
 

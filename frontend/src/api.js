@@ -136,3 +136,31 @@ export async function uploadUserAvatar(userId, file) {
   }
   return data
 }
+
+export async function uploadGoodImages(goodId, files) {
+  const formData = new FormData()
+  files.forEach((file) => {
+    formData.append('files', file)
+  })
+
+  const response = await fetch(`/api/good-images/${goodId}/upload`, {
+    method: 'POST',
+    body: formData,
+  })
+
+  const data = await response.json()
+  if (!response.ok || data.success === false) {
+    throw new Error(data.message || '商品图片上传失败')
+  }
+  return data
+}
+
+export function fetchGoodImages(goodId) {
+  return request(`/good-images/good/${goodId}`)
+}
+
+export function deleteGoodImage(imageId) {
+  return request(`/good-images/${imageId}`, {
+    method: 'DELETE',
+  })
+}

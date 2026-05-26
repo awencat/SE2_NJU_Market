@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Plus, Edit, Delete, Upload } from '@element-plus/icons-vue'
+import { deleteGoodImage, uploadGoodImages } from '../api'
 
 const router = useRouter()
 
@@ -58,6 +59,7 @@ const form = ref({
   status: 'available',
   condition: '',
   viewCount: 0,
+  image: '',
 })
 
 // 表单验证规则
@@ -108,7 +110,9 @@ function getStatusName(status) {
 
 function fixurl(fileName) {
   if (!fileName) return ''
-  return `http://localhost:8095/images/${fileName}`
+  if (fileName.startsWith('http')) return fileName
+  if (fileName.startsWith('/uploads/')) return `http://localhost:8080${fileName}`
+  return `http://localhost:8080/uploads/goods/${fileName}`
 }
 
 function handleImageError(event) {
@@ -180,6 +184,7 @@ function resetForm() {
     status: 'available',
     condition: '',
     viewCount: 0,
+    image: '',
   }
   fileList.value = []
   if (formRef.value) {
@@ -205,12 +210,22 @@ function mod(row) {
     status: row.status,
     condition: row.condition || '',
     viewCount: row.viewCount || 0,
+    image: row.image || row.imageUrl || row.coverUrl || '',
   }
   // 如果有图片，设置fileList
-  if (row.image) {
+  if (Array.isArray(row.images) && row.images.length > 0) {
+    fileList.value = row.images.map((image) => ({
+      name: image.imageUrl,
+      url: fixurl(image.imageUrl),
+      imageId: image.imageId,
+      status: 'success',
+    }))
+  } else if (row.image || row.imageUrl || row.coverUrl) {
+    const imageUrl = row.image || row.imageUrl || row.coverUrl
     fileList.value = [{
-      name: row.image,
-      url: fixurl(row.image),
+      name: imageUrl,
+      url: fixurl(imageUrl),
+      status: 'success',
     }]
   } else {
     fileList.value = []
@@ -246,11 +261,66 @@ async function del(id) {
   }
 }
 
-function handleSuccess(response, file, uploadedFileList) {
+// 自定义上传方法
+async function customUpload(options) {
+  const { file, onSuccess, onError, onProgress } = options
+
+  const formData = new FormData()
+  formData.append('files', file)
+
+  try {
+    // 如果是编辑模式且有商品ID，则使用商品的ID作为路径参数
+    let uploadUrl = '/api/good-images/upload-temp'
+
+    if (isEdit.value && form.value.goodId) {
+      uploadUrl = `/api/good-images/${form.value.goodId}/upload`
+    }
+
+    const xhr = new XMLHttpRequest()
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percent = Math.round((event.loaded / event.total) * 100)
+        onProgress({ percent })
+      }
+    }
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const response = JSON.parse(xhr.responseText)
+          onSuccess(response, file)
+        } catch (e) {
+          onError(new Error('响应解析失败'))
+        }
+      } else {
+        onError(new Error(`上传失败: ${xhr.statusText}`))
+      }
+    }
+
+    xhr.onerror = () => {
+      onError(new Error('网络错误'))
+    }
+
+    xhr.open('POST', uploadUrl, true)
+    xhr.send(formData)
+  } catch (error) {
+    console.error('上传错误:', error)
+    onError(error)
+  }
+}
+
+async function handleSuccess(response, file, uploadedFileList) {
   console.log('上传成功:', response, file, uploadedFileList)
 
   if (response && response.success && response.data) {
-    form.value.image = response.data
+    // 如果是数组，取第一个图片URL
+    const imageData = Array.isArray(response.data) ? response.data[0] : response.data
+    if (imageData && imageData.imageUrl) {
+      form.value.image = imageData.imageUrl
+    } else if (typeof imageData === 'string') {
+      form.value.image = imageData
+    }
   } else if (response && response.url) {
     form.value.image = response.url
   } else {
@@ -262,11 +332,10 @@ function handleSuccess(response, file, uploadedFileList) {
 }
 
 function beforeUpload(file) {
-  const isJPG = file.type === 'image/jpeg'
-  const isPNG = file.type === 'image/png'
+  const isAllowedType = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)
   const isLt2M = file.size / 1024 / 1024 < 2
 
-  if (!isJPG && !isPNG) {
+  if (!isAllowedType) {
     ElMessage.error('只能上传 JPG/PNG 格式的图片!')
     return false
   }
@@ -277,6 +346,44 @@ function beforeUpload(file) {
   }
 
   return true
+}
+
+function handleImageChange(uploadFile, uploadFiles) {
+  fileList.value = uploadFiles
+  if (uploadFile.raw && !beforeUpload(uploadFile.raw)) {
+    fileList.value = uploadFiles.filter((item) => item.uid !== uploadFile.uid)
+  }
+}
+
+async function handleImageRemove(uploadFile, uploadFiles) {
+  fileList.value = uploadFiles
+  if (!uploadFile.imageId) {
+    return
+  }
+
+  try {
+    await deleteGoodImage(uploadFile.imageId)
+    ElMessage.success('图片删除成功')
+  } catch (error) {
+    ElMessage.error(error.message || '图片删除失败')
+  }
+}
+
+async function uploadSelectedImages(goodId) {
+  const files = fileList.value
+      .map((item) => item.raw)
+      .filter(Boolean)
+
+  if (files.length === 0) {
+    return []
+  }
+
+  const result = await uploadGoodImages(goodId, files)
+  const images = result.data || []
+  if (images.length > 0) {
+    form.value.image = images[0].imageUrl
+  }
+  return images
 }
 
 async function doSave() {
@@ -297,6 +404,10 @@ async function doSave() {
     const res = await response.json()
 
     if (res.success) {
+      const goodId = res.data?.goodId
+      if (goodId) {
+        await uploadSelectedImages(goodId)
+      }
       ElMessage.success('添加成功')
       dialogVisible.value = false
       resetForm()
@@ -323,6 +434,7 @@ async function doMod() {
     const res = await response.json()
 
     if (res.success) {
+      await uploadSelectedImages(form.value.goodId)
       ElMessage.success('修改成功')
       dialogVisible.value = false
       resetForm()
@@ -543,11 +655,13 @@ onMounted(() => {
 
         <el-form-item label="商品图片" prop="image">
           <el-upload
-              action="http://localhost:8095/upload/uploadit"
-              :file-list="fileList"
-              :on-success="handleSuccess"
-              :before-upload="beforeUpload"
-              :limit="1"
+              v-model:file-list="fileList"
+              :auto-upload="false"
+              :on-change="handleImageChange"
+              :on-remove="handleImageRemove"
+              :limit="6"
+              multiple
+              accept="image/png,image/jpeg,image/gif,image/webp"
               list-type="picture-card"
           >
             <el-icon><Upload /></el-icon>
