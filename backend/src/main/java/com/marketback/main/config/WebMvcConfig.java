@@ -22,9 +22,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
         Path uploadPath = Paths.get(avatarStorageProperties.getUploadDir()).toAbsolutePath().normalize();
         registry.addResourceHandler(publicPath + "**")
                 .addResourceLocations(uploadPath.toUri().toString());
+
+        Path goodsImagePath = Paths.get("uploads/goods").toAbsolutePath().normalize();
+        registry.addResourceHandler("/uploads/goods/**")
+                .addResourceLocations(goodsImagePath.toUri().toString());
     }
 
     private String ensureTrailingSlash(String value) {
         return value.endsWith("/") ? value : value + "/";
     }
 }
+

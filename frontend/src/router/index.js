@@ -7,18 +7,24 @@ import CrudDashboard from '../components/CrudDashboard.vue'
 import HomePage from '../components/Homepage.vue'
 import UpdatePage from '../components/update.vue'
 import DailyShop from '../shops/DailyShop.vue'
-import GoodDetail from '../shops/GoodDetail.vue'
+import BookShop from '../shops/BookShop.vue'
+import SportsShop from '../shops/SportsShop.vue'
+import DigitalShop from '../shops/DigitalShop.vue'
+import GoodsManager from "../Admins/GoodsManager.vue";
+import GoodDetail from "../shops/GoodDetail.vue";
+
 
 const placeholderRoutes = [
+
   {
-    path: '/VideoShop',
-    menuIndex: '/VideoShop',
+    path: '/DigitalShop',
+    menuIndex: '/DigitalShop',
     title: '游戏商城',
     description: '游戏数码分类页还未实现，当前先保留路由入口。',
   },
   {
-    path: '/MusicShop',
-    menuIndex: '/MusicShop',
+    path: '/SportsShop',
+    menuIndex: '/SportsShop',
     title: '音乐商城',
     description: '音乐影音分类页还未实现，当前先保留路由入口。',
   },
@@ -34,12 +40,7 @@ const placeholderRoutes = [
     title: '萌宠商城',
     description: '萌宠用品分类页还未实现，当前先保留路由入口。',
   },
-  {
-    path: '/GoodsManager',
-    menuIndex: '/GoodsManager',
-    title: '商品管理',
-    description: '商品管理页还未实现，后续可以提供发布、编辑、下架商品等功能。',
-  },
+
   {
     path: '/UserManager',
     menuIndex: '/UserManager',
@@ -53,7 +54,9 @@ const routes = [
     path: '/',
     name: 'login',
     component: Login,
-    meta: { title: '登录' },
+    meta: {
+      title: '登录',
+    },
   },
   {
     path: '/FrontPage',
@@ -66,7 +69,7 @@ const routes = [
         meta: {
           title: '南京大学校园二手交易平台',
           menuIndex: '/FrontPage',
-        },
+        }
       },
       {
         path: '/HomePage',
@@ -85,6 +88,47 @@ const routes = [
           title: '日用商城',
           menuIndex: '/FrontPage',
         },
+
+      },
+      {
+        path: '/BookShop',
+        name: 'BookShop',
+        component: BookShop,
+        meta: {
+          title: '日用商城',
+          menuIndex: '/FrontPage',
+        },
+
+      },
+      {
+        path: '/SportsShop',
+        name: 'SportsShop',
+        component: SportsShop,
+        meta: {
+          title: '日用商城',
+          menuIndex: '/FrontPage',
+        },
+
+      },
+      {
+        path: '/DigitalShop',
+        name: 'DigitalShop',
+        component: DigitalShop,
+        meta: {
+          title: '日用商城',
+          menuIndex: '/FrontPage',
+        },
+
+      },
+
+      {
+        path: '/GoodsManager',
+        name: 'GoodsManager',
+        component: GoodsManager,
+        meta: {
+          title: '商品管理',
+          menuIndex: '/FrontPage',
+        },
       },
       {
         path: '/goods/:id',
@@ -94,9 +138,10 @@ const routes = [
           title: '商品详情',
           menuIndex: '/FrontPage',
         },
-      },
+      }
     ],
   },
+
   {
     path: '/update',
     name: 'UpdatePage',
@@ -104,7 +149,7 @@ const routes = [
     meta: {
       title: '修改资料',
       menuIndex: '/update',
-    },
+    }
   },
   ...placeholderRoutes.map((item) => ({
     path: item.path,

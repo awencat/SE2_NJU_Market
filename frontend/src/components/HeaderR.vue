@@ -69,11 +69,12 @@ async function logout() {
     <el-sub-menu index="shops">
       <template #title>商城精选</template>
       <el-menu-item index="/DailyShop" @click="go('/DailyShop')">日用</el-menu-item>
-      <el-menu-item index="/VideoShop" @click="go('/VideoShop')">游戏</el-menu-item>
-      <el-menu-item index="/MusicShop" @click="go('/MusicShop')">音乐</el-menu-item>
+      <el-menu-item index="/DigitalShop" @click="go('/DigitalShop')">数码</el-menu-item>
+      <el-menu-item index="/SportsShop" @click="go('/SportsShop')">体育</el-menu-item>
       <el-menu-item index="/BookShop" @click="go('/BookShop')">书刊</el-menu-item>
       <el-menu-item index="/PetShop" @click="go('/PetShop')">萌宠</el-menu-item>
     </el-sub-menu>
+
 
     <el-menu-item index="/GoodsManager" @click="go('/GoodsManager')">商品管理</el-menu-item>
     <el-menu-item index="/UserManager" @click="go('/UserManager')">用户管理</el-menu-item>
