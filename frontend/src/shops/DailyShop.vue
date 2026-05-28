@@ -32,11 +32,12 @@ function getSellerPhone(product) {
 }
 
 function getImageUrl(product) {
-  const image = product.image || product.imageUrl || product.coverUrl
+  const image = product.image || product.imageUrl || product.coverUrl || product.images?.[0]?.imageUrl
   if (!image) return ''
   if (/^https?:\/\//.test(image)) return image
+  if (image.startsWith('/uploads/')) return `http://localhost:8080${image}`
   if (image.startsWith('/')) return image
-  return `http://localhost:8095/images/${image}`
+  return `http://localhost:8080/uploads/goods/${image}`
 }
 
 function isPurchasable(product) {
@@ -46,9 +47,12 @@ function isPurchasable(product) {
 function statusText(status) {
   const map = {
     ON_SALE: '在售',
+    available: '在售',
     RESERVED: '已被订购',
     SOLD: '已售出',
+    sold: '已售出',
     OFF_SALE: '已下架',
+    offline: '已下架',
   }
   return map[status] || status || '在售'
 }

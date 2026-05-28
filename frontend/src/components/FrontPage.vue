@@ -1,6 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { fetchList } from '../api'
+import { useRouter } from 'vue-router'
+import { fetchPage } from '../api'
+
+const router = useRouter()
 
 const categories = [
   { title: '教材书刊', desc: '课程教材、考研资料、杂志读物', path: '/BookShop' },
@@ -15,21 +18,20 @@ const loading = ref(false)
 async function loadLatestGoods() {
   loading.value = true
   try {
-    const result = await fetchList('goods')
-    const allGoods = Array.isArray(result.data) ? result.data : (Array.isArray(result) ? result : [])
-
-    const sortedGoods = allGoods.sort((a, b) => {
-      const dateA = new Date( a.created_at || 0).getTime()
-      const dateB = new Date( b.created_at || 0).getTime()
-      return dateB - dateA
+    const result = await fetchPage({
+      pageSize: 4,
+      pageNum: 1,
+      param: {},
     })
+    const records = Array.isArray(result.data) ? result.data : (result.data?.records || [])
 
-    goods.value = sortedGoods.slice(0, 4).map(item => ({
+    goods.value = records.map(item => ({
       title: item.title || '未命名商品',
       price: `¥${item.price || 0}`,
       tag: item.campus || item.status || '待售',
       condition: item.condition || '二手',
       goodId: item.goodId || item.id,
+      imageUrl: getImageUrl(item),
     }))
   } catch (error) {
     console.error('加载商品失败:', error)
@@ -37,6 +39,20 @@ async function loadLatestGoods() {
   } finally {
     loading.value = false
   }
+}
+
+function getImageUrl(item) {
+  const image = item.image || item.imageUrl || item.coverUrl || item.images?.[0]?.imageUrl
+  if (!image) return ''
+  if (/^https?:\/\//.test(image)) return image
+  if (image.startsWith('/uploads/')) return `http://localhost:8080${image}`
+  if (image.startsWith('/')) return image
+  return `http://localhost:8080/uploads/goods/${image}`
+}
+
+function openGoodDetail(item) {
+  if (!item.goodId) return
+  router.push(`/goods/${item.goodId}`)
 }
 
 onMounted(() => {
@@ -96,8 +112,17 @@ onMounted(() => {
         <article v-else-if="goods.length === 0" class="good-card empty-card">
           <p>暂无商品</p>
         </article>
-        <article v-else v-for="item in goods" :key="item.goodId || item.title" class="good-card">
-          <div class="good-image">{{ item.title.slice(0, 2) }}</div>
+        <article
+          v-else
+          v-for="item in goods"
+          :key="item.goodId || item.title"
+          class="good-card"
+          @click="openGoodDetail(item)"
+        >
+          <div class="good-image">
+            <img v-if="item.imageUrl" :src="item.imageUrl" :alt="item.title" />
+            <span v-else>{{ item.title.slice(0, 2) }}</span>
+          </div>
           <div class="good-info">
             <h3>{{ item.title }}</h3>
             <p>{{ item.condition }}</p>
@@ -252,6 +277,14 @@ onMounted(() => {
   border: 1px solid #dbe4ee;
   border-radius: 8px;
   background: #fff;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.good-card:hover {
+  transform: translateY(-2px);
+  border-color: #e4a647;
+  box-shadow: 0 12px 28px rgba(32, 48, 64, 0.12);
 }
 
 .loading-card,
@@ -271,6 +304,13 @@ onMounted(() => {
   color: #203040;
   font-weight: 800;
   font-size: 24px;
+}
+
+.good-image img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .good-info {
@@ -331,4 +371,3 @@ onMounted(() => {
   }
 }
 </style>
-

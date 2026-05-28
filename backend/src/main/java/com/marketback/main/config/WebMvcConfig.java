@@ -24,16 +24,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
         String publicPath = ensureTrailingSlash(avatarStorageProperties.getPublicPath());
         Path uploadPath = Paths.get(avatarStorageProperties.getUploadDir()).toAbsolutePath().normalize();
         registry.addResourceHandler(publicPath + "**")
-                .addResourceLocations(uploadPath.toUri().toString());
+                .addResourceLocations(ensureTrailingSlash(uploadPath.toUri().toString()));
 
         String goodsImagePublicPath = ensureTrailingSlash(goodsImageStorageProperties.getPublicPath());
         Path goodsImagePath = Paths.get(goodsImageStorageProperties.getUploadDir()).toAbsolutePath().normalize();
         registry.addResourceHandler(goodsImagePublicPath + "**")
-                .addResourceLocations(goodsImagePath.toUri().toString());
+                .addResourceLocations(ensureTrailingSlash(goodsImagePath.toUri().toString()));
     }
 
     private String ensureTrailingSlash(String value) {
         return value.endsWith("/") ? value : value + "/";
     }
 }
-

@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   ArrowLeft,
+  ArrowRight,
   ChatLineRound,
   Coin,
   Goods,
@@ -40,6 +41,21 @@ const reportReason = ref('')
 const activeTab = ref('comments')
 const purchaseDialogVisible = ref(false)
 const purchaseResult = ref(null)
+const currentImageIndex = ref(0)
+
+const imageUrls = computed(() => {
+  const images = good.value?.images || []
+  const urls = images
+    .map((item) => normalizeImageUrl(item.imageUrl || item.url || item))
+    .filter(Boolean)
+  const cover = normalizeImageUrl(good.value?.image || good.value?.imageUrl || good.value?.coverUrl)
+  if (cover && !urls.includes(cover)) {
+    urls.unshift(cover)
+  }
+  return urls
+})
+
+const currentImageUrl = computed(() => imageUrls.value[currentImageIndex.value] || '')
 
 function readCurrentUser() {
   const raw = localStorage.getItem('nju-market-user') || sessionStorage.getItem('User')
@@ -86,12 +102,21 @@ function getSellerId() {
   return good.value?.sellerId || good.value?.authorId || good.value?.userId
 }
 
-function getImageUrl() {
-  const image = good.value?.image || good.value?.imageUrl || good.value?.coverUrl
+function normalizeImageUrl(image) {
   if (!image) return ''
   if (/^https?:\/\//.test(image)) return image
+  if (image.startsWith('/uploads/')) return `http://localhost:8080${image}`
   if (image.startsWith('/')) return image
   return `http://localhost:8095/images/${image}`
+}
+
+function switchImage(offset) {
+  if (imageUrls.value.length <= 1) return
+  currentImageIndex.value = (currentImageIndex.value + offset + imageUrls.value.length) % imageUrls.value.length
+}
+
+function selectImage(index) {
+  currentImageIndex.value = index
 }
 
 function isPurchasable() {
@@ -128,6 +153,7 @@ async function loadGood() {
   if (!good.value) {
     throw new Error('商品不存在')
   }
+  currentImageIndex.value = 0
 }
 
 async function loadFeedback() {
@@ -255,10 +281,44 @@ onMounted(loadPage)
     <main v-loading="loading" class="detail-shell">
       <section v-if="good" class="hero-section">
         <div class="image-panel">
-          <img v-if="getImageUrl()" :src="getImageUrl()" :alt="getGoodTitle()" />
-          <div v-else class="image-empty">
-            <el-icon><Goods /></el-icon>
-            <span>暂无图片</span>
+          <div class="main-image-wrap">
+            <img v-if="currentImageUrl" :src="currentImageUrl" :alt="getGoodTitle()" />
+            <div v-else class="image-empty">
+              <el-icon><Goods /></el-icon>
+              <span>暂无图片</span>
+            </div>
+
+            <button
+              v-if="imageUrls.length > 1"
+              class="gallery-button gallery-button--prev"
+              type="button"
+              aria-label="上一张图片"
+              @click="switchImage(-1)"
+            >
+              <el-icon><ArrowLeft /></el-icon>
+            </button>
+            <button
+              v-if="imageUrls.length > 1"
+              class="gallery-button gallery-button--next"
+              type="button"
+              aria-label="下一张图片"
+              @click="switchImage(1)"
+            >
+              <el-icon><ArrowRight /></el-icon>
+            </button>
+          </div>
+
+          <div v-if="imageUrls.length > 1" class="thumbnail-row">
+            <button
+              v-for="(image, index) in imageUrls"
+              :key="image"
+              class="thumbnail-button"
+              :class="{ active: index === currentImageIndex }"
+              type="button"
+              @click="selectImage(index)"
+            >
+              <img :src="image" :alt="`${getGoodTitle()} 图片 ${index + 1}`" />
+            </button>
           </div>
         </div>
 
@@ -447,15 +507,25 @@ onMounted(loadPage)
   overflow: hidden;
 }
 
-.image-panel img,
-.image-empty {
-  width: 100%;
-  height: 100%;
+.main-image-wrap {
+  position: relative;
+  height: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1eadf;
 }
 
-.image-panel img {
+.main-image-wrap img,
+.image-empty {
+  width: 100%;
+}
+
+.main-image-wrap img {
+  max-width: 100%;
+  max-height: 100%;
   display: block;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .image-empty {
@@ -470,6 +540,68 @@ onMounted(loadPage)
 
 .image-empty .el-icon {
   font-size: 56px;
+}
+
+.gallery-button {
+  position: absolute;
+  top: 50%;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(31, 39, 37, 0.66);
+  color: #fff;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.gallery-button:hover {
+  background: rgba(31, 39, 37, 0.86);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.gallery-button--prev {
+  left: 14px;
+}
+
+.gallery-button--next {
+  right: 14px;
+}
+
+.thumbnail-row {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  overflow-x: auto;
+  border-top: 1px solid #e0d3c3;
+  background: #fffaf2;
+}
+
+.thumbnail-button {
+  flex: 0 0 74px;
+  height: 58px;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: #eadfce;
+  cursor: pointer;
+}
+
+.thumbnail-button.active {
+  border-color: #2f5f58;
+}
+
+.thumbnail-button img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  background: #f1eadf;
 }
 
 .info-panel {
@@ -674,8 +806,10 @@ onMounted(loadPage)
   }
 
   .image-panel,
+  .main-image-wrap,
   .image-empty {
     min-height: 320px;
+    height: 320px;
   }
 }
 
