@@ -27,6 +27,8 @@ import java.util.UUID;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     private static final Set<String> ALLOWED_AVATAR_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif", "webp");
+    private static final String STATUS_ACTIVE = "ACTIVE";
+    private static final String STATUS_BANNED = "BANNED";
 
     private final PasswordEncoder passwordEncoder;
     private final AvatarStorageProperties avatarStorageProperties;
@@ -70,8 +72,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = getOne(new LambdaQueryWrapper<User>()
                 .eq(User::getUsername, username)
                 .last("LIMIT 1"));
-        if (user == null || user.getPassword() == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (user == null || user.getPassword() == null || !passwordMatches(request.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("username or password is incorrect");
+        }
+        if (STATUS_BANNED.equals(user.getStatus())) {
+            throw new IllegalArgumentException("user is banned");
         }
         return toAuthResponse(user);
     }
@@ -124,6 +129,35 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return super.updateById(entity);
     }
 
+    @Override
+    public User banUser(Integer userId) {
+        return updateUserStatus(userId, STATUS_BANNED);
+    }
+
+    @Override
+    public User unbanUser(Integer userId) {
+        return updateUserStatus(userId, STATUS_ACTIVE);
+    }
+
+    private User updateUserStatus(Integer userId, String status) {
+        User user = getById(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("user not found");
+        }
+        user.setStatus(status);
+        if (!updateById(user)) {
+            throw new IllegalArgumentException("user status update failed");
+        }
+        return user;
+    }
+
+    private boolean passwordMatches(String rawPassword, String storedPassword) {
+        if (storedPassword.startsWith("$2")) {
+            return passwordEncoder.matches(rawPassword, storedPassword);
+        }
+        return storedPassword.equals(rawPassword);
+    }
+
     private void normalizeUser(User entity) {
         if (entity == null) {
             return;
@@ -139,6 +173,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         entity.setPhone(InputSanitizer.normalizeNullableText(entity.getPhone()));
         entity.setCampus(InputSanitizer.normalizeNullableText(entity.getCampus()));
         entity.setAddress(InputSanitizer.normalizeNullableText(entity.getAddress()));
+        if (entity.getStatus() == null || entity.getStatus().isBlank()) {
+            entity.setStatus(STATUS_ACTIVE);
+        }
         if (entity.getPassword() != null && !entity.getPassword().isBlank() && !entity.getPassword().startsWith("$2")) {
             entity.setPassword(passwordEncoder.encode(entity.getPassword()));
         }

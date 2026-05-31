@@ -14,4 +14,8 @@ public interface UserService extends IService<User> {
     AuthResponse login(LoginRequest request);
 
     User uploadAvatar(Integer userId, MultipartFile file);
+
+    User banUser(Integer userId);
+
+    User unbanUser(Integer userId);
 }

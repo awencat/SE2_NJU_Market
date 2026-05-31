@@ -25,4 +25,14 @@ public class UserController extends BaseCrudController<User> {
     public ApiResponse<User> uploadAvatar(@PathVariable Integer id, @RequestParam("file") MultipartFile file) {
         return ApiResponse.success("avatar uploaded", userService.uploadAvatar(id, file));
     }
+
+    @PostMapping("/{id}/ban")
+    public ApiResponse<User> banUser(@PathVariable Integer id) {
+        return ApiResponse.success("user banned", userService.banUser(id));
+    }
+
+    @PostMapping("/{id}/unban")
+    public ApiResponse<User> unbanUser(@PathVariable Integer id) {
+        return ApiResponse.success("user unbanned", userService.unbanUser(id));
+    }
 }

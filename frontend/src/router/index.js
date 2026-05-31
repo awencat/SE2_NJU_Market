@@ -12,6 +12,8 @@ import SportsShop from '../shops/SportsShop.vue'
 import DigitalShop from '../shops/DigitalShop.vue'
 import GoodsManager from "../Admins/GoodsManager.vue";
 import GoodDetail from "../shops/GoodDetail.vue";
+import AdminLogin from '../Admins/AdminLogin.vue'
+import AdminDashboard from '../Admins/AdminDashboard.vue'
 
 
 const placeholderRoutes = [
@@ -56,6 +58,22 @@ const routes = [
     component: Login,
     meta: {
       title: '登录',
+    },
+  },
+  {
+    path: '/admin-login',
+    name: 'AdminLogin',
+    component: AdminLogin,
+    meta: {
+      title: '管理员登录',
+    },
+  },
+  {
+    path: '/admin/dashboard',
+    name: 'AdminDashboard',
+    component: AdminDashboard,
+    meta: {
+      title: '后台管理系统',
     },
   },
   {

@@ -87,6 +87,25 @@ export function loginUser(payload) {
   })
 }
 
+export function loginAdmin(payload) {
+  return request('/admins/login', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function banUser(userId) {
+  return request(`/users/${userId}/ban`, {
+    method: 'POST',
+  })
+}
+
+export function unbanUser(userId) {
+  return request(`/users/${userId}/unban`, {
+    method: 'POST',
+  })
+}
+
 export function purchaseGood(payload) {
   return request('/orders/purchase', {
     method: 'POST',
