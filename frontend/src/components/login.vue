@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { loginUser, registerUser } from '../api'
 import { useRouter } from 'vue-router'
+import {ElMessage} from "element-plus";
 
 const router = useRouter()
 
@@ -46,11 +47,28 @@ async function submitLogin() {
   loading.value = true
   try {
     const result = await loginUser(loginForm.value)
+
+    if (result.data.status === 'BANNED') {
+      ElMessage.error('您的账号已被封禁，请联系管理员')
+      return
+    }
+
     persistUser(result.data)
     message.value = `欢迎回来，${result.data.username}`
     loginForm.value.password = ''
     router.replace('/FrontPage')
   } catch (error) {
+
+    const errorMsg = error.message || '登录失败'
+
+    if (errorMsg.includes('username') || errorMsg.includes('password')) {
+      ElMessage.error('用户名或密码错误，请重试')}
+    else if ( errorMsg.includes('ban')) {
+      ElMessage.error('您的账号已被封禁，请联系管理员')
+    } else {
+      ElMessage.error(errorMsg)
+    }
+
     message.value = error.message || '登录失败'
   } finally {
     loading.value = false

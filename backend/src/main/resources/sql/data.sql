@@ -14,12 +14,12 @@ DELETE FROM admin;
 DELETE FROM `user`;
 
 INSERT INTO `user` (
-  user_id, username, password, email, phone, avatar_url, campus, address, status, created_at, updated_at
+  user_id, username, password, email, phone, avatar_url, campus, address, status, created_at, updated_at,status
 ) VALUES
-  (1, 'alice', '123456', 'alice@example.com', '13800000001', 'https://example.com/avatar/alice.png', 'Xianlin', 'Dorm 1-201', 'ACTIVE', '2026-04-20 09:00:00', '2026-04-20 09:00:00'),
-  (2, 'bob', '123456', 'bob@example.com', '13800000002', 'https://example.com/avatar/bob.png', 'Gulou', 'Dorm 3-402', 'ACTIVE', '2026-04-20 09:10:00', '2026-04-21 10:00:00'),
-  (3, 'charlie', '123456', 'charlie@example.com', '13800000003', 'https://example.com/avatar/charlie.png', 'Xianlin', 'Dorm 5-118', 'ACTIVE', '2026-04-20 09:20:00', '2026-04-22 11:00:00'),
-  (4, 'diana', '123456', 'diana@example.com', '13800000004', 'https://example.com/avatar/diana.png', 'Pukou', 'Dorm 2-315', 'ACTIVE', '2026-04-20 09:30:00', '2026-04-22 14:30:00');
+  (1, 'alice', '123456', 'alice@example.com', '13800000001', 'https://example.com/avatar/alice.png', 'Xianlin', 'Dorm 1-201', 'ACTIVE', '2026-04-20 09:00:00', '2026-04-20 09:00:00','ACTIVE'),
+  (2, 'bob', '123456', 'bob@example.com', '13800000002', 'https://example.com/avatar/bob.png', 'Gulou', 'Dorm 3-402', 'ACTIVE', '2026-04-20 09:10:00', '2026-04-21 10:00:00','ACTIVE'),
+  (3, 'charlie', '123456', 'charlie@example.com', '13800000003', 'https://example.com/avatar/charlie.png', 'Xianlin', 'Dorm 5-118', 'ACTIVE', '2026-04-20 09:20:00', '2026-04-22 11:00:00','ACTIVE'),
+  (4, 'diana', '123456', 'diana@example.com', '13800000004', 'https://example.com/avatar/diana.png', 'Pukou', 'Dorm 2-315', 'ACTIVE', '2026-04-20 09:30:00', '2026-04-22 14:30:00','ACTIVE');
 
 INSERT INTO admin (
   admin_id, username, password, role, created_at

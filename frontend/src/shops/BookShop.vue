@@ -35,6 +35,7 @@ function getImageUrl(product) {
   const image = product.image || product.imageUrl || product.coverUrl
   if (!image) return ''
   if (/^https?:\/\//.test(image)) return image
+  if (image.startsWith('/uploads/')) return `http://localhost:8080${image}`
   if (image.startsWith('/')) return image
   return `http://localhost:8095/images/${image}`
 }
