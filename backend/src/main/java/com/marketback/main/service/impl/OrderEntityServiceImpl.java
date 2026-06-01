@@ -26,7 +26,6 @@ public class OrderEntityServiceImpl extends ServiceImpl<OrderEntityMapper, Order
     private static final String STATUS_ON_SALE = "ON_SALE";
     private static final String STATUS_RESERVED = "RESERVED";
     private static final String STATUS_PENDING = "PENDING";
-    private static final String STATUS_CANCELLED = "CANCELLED";
 
     private final GoodService goodService;
     private final OrderItemService orderItemService;
@@ -105,22 +104,25 @@ public class OrderEntityServiceImpl extends ServiceImpl<OrderEntityMapper, Order
         if (buyerId != null && !buyerId.equals(order.getBuyerId())) {
             throw new IllegalArgumentException("only buyer can cancel this order");
         }
-        if (STATUS_CANCELLED.equals(order.getStatus())) {
-            return order;
-        }
 
-        order.setStatus(STATUS_CANCELLED);
-        updateById(order);
-
-        OrderItem item = orderItemService.getOne(
-                new LambdaQueryWrapper<OrderItem>().eq(OrderItem::getOrderId, orderId).last("limit 1")
+        List<OrderItem> items = orderItemService.list(
+                new LambdaQueryWrapper<OrderItem>().eq(OrderItem::getOrderId, orderId)
         );
-        if (item != null) {
+
+        for (OrderItem item : items) {
             Good good = goodService.getById(item.getGoodId());
-            if (good != null && STATUS_RESERVED.equals(good.getStatus())) {
+            if (good != null) {
                 good.setStatus(STATUS_ON_SALE);
                 goodService.updateById(good);
             }
+        }
+
+        if (!items.isEmpty()) {
+            orderItemService.remove(new LambdaQueryWrapper<OrderItem>().eq(OrderItem::getOrderId, orderId));
+        }
+
+        if (!removeById(orderId)) {
+            throw new IllegalArgumentException("order cancel failed");
         }
 
         return order;

@@ -43,9 +43,9 @@ const categoryOptions = [
 
 // 商品状态选项
 const statusOptions = [
-  { value: 'available', label: '可售' },
-  { value: 'sold', label: '已售' },
-  { value: 'offline', label: '下架' },
+  { value: 'ON_SALE', label: '可售' },
+  { value: 'SOLD', label: '已售' },
+  { value: 'RESERVED', label: '下架' },
 ]
 
 // 表单数据
@@ -56,7 +56,7 @@ const form = ref({
   description: '',
   price: 0,
   category: '',
-  status: 'available',
+  status: 'ON_SALE',
   condition: '',
   viewCount: 0,
   image: '',
@@ -92,18 +92,18 @@ function getCategoryTagType(category) {
 
 function getStatusTagType(status) {
   const types = {
-    'available': 'success',
-    'sold': 'info',
-    'offline': 'danger',
+    'ON_SALE': 'success',
+    'SOLD': 'info',
+    'RESERVED': 'danger',
   }
   return types[status] || ''
 }
 
 function getStatusName(status) {
   const names = {
-    'available': '可售',
-    'sold': '已售',
-    'offline': '下架',
+    'ON_SALE': '可售',
+    'SOLD': '已售',
+    'RESERVED': '下架',
   }
   return names[status] || '未知'
 }
@@ -181,7 +181,7 @@ function resetForm() {
     description: '',
     price: 0,
     category: '',
-    status: 'available',
+    status: 'ON_SALE',
     condition: '',
     viewCount: 0,
     image: '',
