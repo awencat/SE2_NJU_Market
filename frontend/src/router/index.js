@@ -3,17 +3,18 @@ import Login from '../components/login.vue'
 import Index from '../components/Index.vue'
 import FrontPage from '../components/FrontPage.vue'
 import PlaceholderPage from '../components/PlaceholderPage.vue'
-import CrudDashboard from '../components/CrudDashboard.vue'
+import CrudDashboard from '../Admins/CrudDashboard.vue'
 import HomePage from '../components/Homepage.vue'
 import UpdatePage from '../components/update.vue'
 import DailyShop from '../shops/DailyShop.vue'
 import BookShop from '../shops/BookShop.vue'
 import SportsShop from '../shops/SportsShop.vue'
 import DigitalShop from '../shops/DigitalShop.vue'
-import GoodsManager from "../Admins/GoodsManager.vue";
+import GoodsManager from "../components/GoodsManager.vue";
 import GoodDetail from "../shops/GoodDetail.vue";
 import AdminLogin from '../Admins/AdminLogin.vue'
 import AdminDashboard from '../Admins/AdminDashboard.vue'
+import OrderManager from  '../components/OrderManager.vue'
 
 
 const placeholderRoutes = [
@@ -74,6 +75,14 @@ const routes = [
     component: AdminDashboard,
     meta: {
       title: '后台管理系统',
+    },
+  },
+  {
+    path: '/admin/crud-dashboard',
+    name: 'AdminCrudDashboard',
+    component: CrudDashboard,
+    meta: {
+      title: '数据控制台',
     },
   },
   {
@@ -149,6 +158,15 @@ const routes = [
         },
       },
       {
+        path: '/OrderManager',
+        name: 'OrderManager',
+        component: OrderManager,
+        meta: {
+          title: '商品管理',
+          menuIndex: '/FrontPage',
+        },
+      },
+      {
         path: '/goods/:id',
         name: 'GoodDetail',
         component: GoodDetail,
@@ -188,21 +206,7 @@ const routes = [
       },
     ],
   })),
-  {
-    path: '/CrudDashboard',
-    component: Index,
-    children: [
-      {
-        path: '',
-        name: 'CrudDashboard',
-        component: CrudDashboard,
-        meta: {
-          title: '数据控制台',
-          menuIndex: '/CrudDashboard',
-        },
-      },
-    ],
-  },
+
 ]
 
 const router = createRouter({

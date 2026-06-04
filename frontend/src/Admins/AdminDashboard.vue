@@ -134,7 +134,10 @@ onMounted(async () => {
         <h1>后台管理系统</h1>
         <p>当前管理员：{{ adminName }}</p>
       </div>
-      <el-button :icon="SwitchButton" @click="logout">退出</el-button>
+      <div class="header-actions">
+        <el-button type="primary" @click="router.push('/admin/crud-dashboard')">数据控制台</el-button>
+        <el-button :icon="SwitchButton" @click="logout">退出</el-button>
+      </div>
     </header>
 
     <section class="section-block">
@@ -301,5 +304,19 @@ onMounted(async () => {
   .category-search {
     width: 100%;
   }
+}
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  max-width: 1180px;
+  margin: 0 auto 24px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 </style>

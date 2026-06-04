@@ -75,10 +75,13 @@ async function logout() {
       <el-menu-item index="/PetShop" @click="go('/PetShop')">萌宠</el-menu-item>
     </el-sub-menu>
 
+    <el-sub-menu index="manager">
+      <template #title>管理页面</template>
+      <el-menu-item index="/GoodsManager" @click="go('/GoodsManager')">商品管理</el-menu-item>
+      <el-menu-item index="/UserManager" @click="go('/OrderManager')">订单管理</el-menu-item>
+    </el-sub-menu>
 
-    <el-menu-item index="/GoodsManager" @click="go('/GoodsManager')">商品管理</el-menu-item>
-    <el-menu-item index="/UserManager" @click="go('/UserManager')">用户管理</el-menu-item>
-    <el-menu-item index="/CrudDashboard" @click="go('/CrudDashboard')">数据控制台</el-menu-item>
+
 
     <el-sub-menu index="user-center">
       <template #title>个人中心</template>

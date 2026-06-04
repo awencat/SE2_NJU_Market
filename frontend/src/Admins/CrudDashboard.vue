@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import {
   createRecord,
   deleteRecord,
@@ -8,6 +9,8 @@ import {
   searchRecords,
   updateRecord,
 } from '../api'
+
+const router = useRouter()
 
 const resources = [
   {
@@ -209,7 +212,9 @@ async function createItem() {
   await runAction(() => createRecord(currentResource.value, payload), '新增成功')
   await loadList()
 }
-
+function go(path) {
+  router.push(path)
+}
 async function updateItem() {
   if (!idInput.value) {
     feedback.value = '更新前请先输入 id'
@@ -252,6 +257,7 @@ resetEditorFromSample()
         <p class="hero-copy">
           这个页面直接对接 Spring Boot CRUD 接口，方便你在数据库建好以后快速联调。
         </p>
+        <el-button type="primary" @click="router.push('/admin/dashboard')">返回</el-button>
       </div>
       <div class="status-card">
         <span class="status-label">当前状态</span>
