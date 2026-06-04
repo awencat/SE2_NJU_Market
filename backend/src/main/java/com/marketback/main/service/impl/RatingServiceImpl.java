@@ -27,6 +27,13 @@ public class RatingServiceImpl extends ServiceImpl<RatingMapper, Rating> impleme
 
     @Override
     public boolean save(Rating entity) {
+        if (entity == null) {
+            throw new IllegalArgumentException("rating is required");
+        }
+        Integer score = entity.getScore();
+        if (score == null || score < 1 || score > 5) {
+            throw new IllegalArgumentException("score must be between 1 and 5");
+        }
         validatePurchased(entity.getUserId(), entity.getGoodId());
         boolean exists = count(new LambdaQueryWrapper<Rating>()
                 .eq(Rating::getUserId, entity.getUserId())

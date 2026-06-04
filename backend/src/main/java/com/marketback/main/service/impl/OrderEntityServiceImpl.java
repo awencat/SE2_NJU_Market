@@ -39,6 +39,14 @@ public class OrderEntityServiceImpl extends ServiceImpl<OrderEntityMapper, Order
     @Override
     @Transactional
     public PurchaseResponse purchase(PurchaseRequest request) {
+        if (request == null || request.getBuyerId() == null || request.getGoodId() == null) {
+            throw new IllegalArgumentException("buyerId and goodId are required");
+        }
+        Integer purchaseCount = request.getCount();
+        if (purchaseCount == null || purchaseCount < 1) {
+            throw new IllegalArgumentException("count must be at least 1");
+        }
+
         User buyer = userService.getById(request.getBuyerId());
         if (buyer == null) {
             throw new IllegalArgumentException("buyer not found");
@@ -52,7 +60,6 @@ public class OrderEntityServiceImpl extends ServiceImpl<OrderEntityMapper, Order
             throw new IllegalArgumentException("buyer cannot purchase own good");
         }
         Integer currentCount = good.getCount() == null ? 0 : good.getCount();
-        Integer purchaseCount = request.getCount();
         if (currentCount <= 0) {
             throw new IllegalArgumentException("good is sold out");
         }
