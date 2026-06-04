@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -34,18 +34,11 @@ const fileList = ref([])
 
 // 分类选项
 const categoryOptions = [
-  { value: 'daily', label: '日用' },
-  { value: 'digital', label: '数码' },
-  { value: 'pet', label: '萌宠' },
-  { value: 'book', label: '书刊' },
-  { value: 'sports', label: '体育' },
-]
-
-// 商品状态选项
-const statusOptions = [
-  { value: 'ON_SALE', label: '可售' },
-  { value: 'SOLD', label: '已售' },
-  { value: 'RESERVED', label: '下架' },
+  { value: '日用', label: '日用' },
+  { value: '数码', label: '数码' },
+  { value: '萌宠', label: '萌宠' },
+  { value: '书刊', label: '书刊' },
+  { value: '体育', label: '体育' },
 ]
 
 // 表单数据
@@ -56,7 +49,7 @@ const form = ref({
   description: '',
   price: 0,
   category: '',
-  status: 'ON_SALE',
+  count: 1,
   condition: '',
   viewCount: 0,
   image: '',
@@ -75,37 +68,30 @@ const rules = {
   category: [
     { required: true, message: '请选择分类', trigger: 'change' },
   ],
-  status: [
-    { required: true, message: '请选择状态', trigger: 'change' },
+  count: [
+    { required: true, message: '请输入库存数量', trigger: 'blur' },
+    { type: 'number', min: 0, message: '库存不能小于0', trigger: 'blur' },
   ],
 }
 
 function getCategoryTagType(category) {
   const types = {
-    '日用': 'daily',
-    '数码': 'digital',
-    '书刊': 'book',
-    '体育': 'sports',
+    '日用': 'primary',
+    '数码': 'success',
+    '书刊': 'warning',
+    '体育': 'danger',
+    '萌宠': 'info',
   }
-  return types[category] || ''
+  return types[category] || 'info'
 }
 
-function getStatusTagType(status) {
-  const types = {
-    'ON_SALE': 'success',
-    'SOLD': 'info',
-    'RESERVED': 'danger',
-  }
-  return types[status] || ''
+function getStockTagType(count) {
+  return Number(count || 0) > 0 ? 'success' : 'info'
 }
 
-function getStatusName(status) {
-  const names = {
-    'ON_SALE': '可售',
-    'SOLD': '已售',
-    'RESERVED': '下架',
-  }
-  return names[status] || '未知'
+function getStockName(count) {
+  const stock = Number(count || 0)
+  return stock > 0 ? `库存 ${stock}` : '已售罄'
 }
 
 function fixurl(fileName) {
@@ -181,7 +167,7 @@ function resetForm() {
     description: '',
     price: 0,
     category: '',
-    status: 'ON_SALE',
+    count: 1,
     condition: '',
     viewCount: 0,
     image: '',
@@ -207,7 +193,7 @@ function mod(row) {
     description: row.description || '',
     price: row.price,
     category: row.category,
-    status: row.status,
+    count: Number(row.count || 0),
     condition: row.condition || '',
     viewCount: row.viewCount || 0,
     image: row.image || row.imageUrl || row.coverUrl || '',
@@ -557,10 +543,10 @@ onMounted(() => {
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="status" label="状态" width="100" align="center">
+      <el-table-column prop="count" label="库存" width="100" align="center">
         <template #default="{ row }">
-          <el-tag :type="getStatusTagType(row.status)" size="small">
-            {{ getStatusName(row.status) }}
+          <el-tag :type="getStockTagType(row.count)" size="small">
+            {{ getStockName(row.count) }}
           </el-tag>
         </template>
       </el-table-column>
@@ -638,15 +624,15 @@ onMounted(() => {
           </el-select>
         </el-form-item>
 
-        <el-form-item label="状态" prop="status">
-          <el-select v-model="form.status" placeholder="请选择状态" style="width: 100%">
-            <el-option
-                v-for="item in statusOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-            />
-          </el-select>
+        <el-form-item label="库存" prop="count">
+          <el-input-number
+              v-model="form.count"
+              :min="0"
+              :step="1"
+              step-strictly
+              controls-position="right"
+              style="width: 100%"
+          />
         </el-form-item>
 
         <el-form-item label="成色" prop="condition">
@@ -776,3 +762,4 @@ onMounted(() => {
   margin-top: 8px;
 }
 </style>
+

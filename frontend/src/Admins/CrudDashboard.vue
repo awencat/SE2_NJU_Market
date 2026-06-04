@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import {
@@ -46,7 +46,7 @@ const resources = [
       description: '九成新，可当面交易',
       price: 25.5,
       category: 'book',
-      status: 'ON_SALE',
+      count: 1,
       condition: 'USED_GOOD',
       viewCount: 0,
     },
@@ -301,7 +301,7 @@ resetEditorFromSample()
       <section class="editor-panel">
         <div class="panel-head">
           <h2>条件查询</h2>
-          <p>传入 JSON 字段做等值筛选，例如商品可按 `sellerId`、`status` 查询。</p>
+          <p>传入 JSON 字段做等值筛选，例如商品可按 `sellerId`、`category` 查询。</p>
         </div>
         <textarea v-model="searchText" class="json-box" spellcheck="false" />
         <button class="solid wide" :disabled="loading" @click="runSearch">执行条件查询</button>
@@ -347,3 +347,5 @@ resetEditorFromSample()
     </main>
   </div>
 </template>
+
+

@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Search, Refresh, Goods, Coin, User, Phone, View } from '@element-plus/icons-vue'
@@ -41,20 +41,12 @@ function getImageUrl(product) {
 }
 
 function isPurchasable(product) {
-  return !product.status || product.status === 'ON_SALE'
+  return Number(product?.count || 0) > 0
 }
 
-function statusText(status) {
-  const map = {
-    ON_SALE: '在售',
-    available: '在售',
-    RESERVED: '已被订购',
-    SOLD: '已售出',
-    sold: '已售出',
-    OFF_SALE: '已下架',
-    offline: '已下架',
-  }
-  return map[status] || status || '在售'
+function statusText(product) {
+  const stock = Number(product?.count || 0)
+  return stock > 0 ? `库存 ${stock}` : '已售罄'
 }
 
 function handleImageError(event) {
@@ -163,7 +155,7 @@ onMounted(loadPost)
               <span>暂无图片</span>
             </div>
             <el-tag class="status-tag" :type="isPurchasable(product) ? 'success' : 'info'" effect="dark">
-              {{ statusText(product.status) }}
+              {{ statusText(product) }}
             </el-tag>
           </div>
 
@@ -425,3 +417,4 @@ h1 {
   }
 }
 </style>
+

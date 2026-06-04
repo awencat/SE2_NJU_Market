@@ -10,6 +10,7 @@ import lombok.Data;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @TableName("`order`")
@@ -27,6 +28,9 @@ public class OrderEntity implements Serializable {
     private BigDecimal totalAmount;
 
     private String status;
+
+    @TableField(exist = false)
+    private List<OrderItem> items;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;

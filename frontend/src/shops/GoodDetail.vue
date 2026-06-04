@@ -1,5 +1,5 @@
-<script setup>
-import { computed, onMounted, ref } from 'vue'
+﻿<script setup>
+import { computed,nextTick, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   ArrowLeft,
@@ -42,6 +42,12 @@ const activeTab = ref('comments')
 const purchaseDialogVisible = ref(false)
 const purchaseResult = ref(null)
 const currentImageIndex = ref(0)
+const purchaseCount = ref(1)
+
+const maxPurchaseCount = computed(() => {
+  const stock = getStockCount()
+  return stock > 0 ? stock : 1
+})
 
 const imageUrls = computed(() => {
   const images = good.value?.images || []
@@ -119,18 +125,17 @@ function selectImage(index) {
   currentImageIndex.value = index
 }
 
-function isPurchasable() {
-  return !good.value?.status || good.value.status === 'ON_SALE'
+function getStockCount() {
+  return Number(good.value?.count || 0)
 }
 
-function statusText(status) {
-  const map = {
-    ON_SALE: '在售',
-    RESERVED: '已被订购',
-    SOLD: '已售出',
-    OFF_SALE: '已下架',
-  }
-  return map[status] || status || '在售'
+function isPurchasable() {
+  return getStockCount() > 0
+}
+
+function stockText() {
+  const stock = getStockCount()
+  return stock > 0 ? `库存 ${stock}` : '已售罄'
 }
 
 function formatTime(value) {
@@ -154,6 +159,13 @@ async function loadGood() {
     throw new Error('商品不存在')
   }
   currentImageIndex.value = 0
+  await nextTick()
+  const stock = getStockCount()
+  if (stock > 0) {
+    purchaseCount.value = Math.min(Math.max(Number(purchaseCount.value || 1), 1), stock)
+  } else {
+    purchaseCount.value = 1
+  }
 }
 
 async function loadFeedback() {
@@ -181,10 +193,15 @@ async function loadPage() {
 async function buyProduct() {
   const buyerId = requireLogin()
   if (!buyerId || !good.value) return
+  const count = Number(purchaseCount.value || 1)
+  if (count < 1 || count > getStockCount()) {
+    ElMessage.warning('请选择有效的购买数量')
+    return
+  }
 
   buying.value = true
   try {
-    const res = await purchaseGood({ buyerId, goodId: goodId.value })
+    const res = await purchaseGood({ buyerId, goodId: goodId.value, count })
     purchaseResult.value = res.data
     purchaseDialogVisible.value = true
     ElMessage.success('订购成功')
@@ -257,7 +274,6 @@ async function submitReport() {
       targetGoodId: goodId.value,
       reportType: 'GOOD',
       reason: reportReason.value.trim(),
-      status: 'PENDING',
     })
     reportReason.value = ''
     ElMessage.success('举报已提交，等待管理员处理')
@@ -325,7 +341,7 @@ onMounted(loadPage)
         <div class="info-panel">
           <div class="title-row">
             <el-tag :type="isPurchasable() ? 'success' : 'info'" effect="dark">
-              {{ statusText(good.status) }}
+              {{ stockText() }}
             </el-tag>
             <span class="category">{{ good.category || '日用' }}</span>
           </div>
@@ -338,6 +354,17 @@ onMounted(loadPage)
             ￥{{ good.price || 0 }}
           </div>
 
+          <div class="purchase-count-box">
+            <span>购买数量</span>
+            <el-input-number
+                v-model="purchaseCount"
+                :min="1"
+                :max="maxPurchaseCount"
+                :disabled="!isPurchasable()"
+                step-strictly
+                controls-position="right"
+            />
+          </div>
           <div class="seller-box">
             <div class="seller-title">
               <el-icon><User /></el-icon>
@@ -448,6 +475,7 @@ onMounted(loadPage)
       <div v-if="purchaseResult" class="purchase-dialog">
         <strong>{{ purchaseResult.goodTitle }}</strong>
         <p>订单号：{{ purchaseResult.orderNumber }}</p>
+        <p>数量：{{ purchaseResult.count }}</p>
         <p>金额：￥{{ purchaseResult.totalAmount }}</p>
         <p>卖家：{{ purchaseResult.sellerName }}</p>
         <p v-if="purchaseResult.sellerPhone">电话：{{ purchaseResult.sellerPhone }}</p>
@@ -651,6 +679,23 @@ onMounted(loadPage)
   border-radius: 8px;
 }
 
+.purchase-count-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border: 1px solid #eadfce;
+  border-radius: 8px;
+  background: #fffaf2;
+}
+
+.purchase-count-box span {
+  color: #3f6f67;
+  font-weight: 800;
+}
+
 .seller-title,
 .seller-box p {
   display: flex;
@@ -825,3 +870,4 @@ onMounted(loadPage)
   }
 }
 </style>
+

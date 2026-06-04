@@ -29,7 +29,7 @@ public class Good implements Serializable {
 
     private String category;
 
-    private String status;
+    private Integer count;
 
     @TableField("`condition`")
     private String condition;

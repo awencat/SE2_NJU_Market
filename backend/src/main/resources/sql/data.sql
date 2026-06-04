@@ -1,4 +1,4 @@
-USE nju_market;
+﻿USE nju_market;
 
 SET NAMES utf8mb4;
 
@@ -14,12 +14,12 @@ DELETE FROM admin;
 DELETE FROM `user`;
 
 INSERT INTO `user` (
-  user_id, username, password, email, phone, avatar_url, campus, address, status, created_at, updated_at,status
+  user_id, username, password, email, phone, avatar_url, campus, address, status, created_at, updated_at
 ) VALUES
-  (1, 'alice', '123456', 'alice@example.com', '13800000001', 'https://example.com/avatar/alice.png', 'Xianlin', 'Dorm 1-201', 'ACTIVE', '2026-04-20 09:00:00', '2026-04-20 09:00:00','ACTIVE'),
-  (2, 'bob', '123456', 'bob@example.com', '13800000002', 'https://example.com/avatar/bob.png', 'Gulou', 'Dorm 3-402', 'ACTIVE', '2026-04-20 09:10:00', '2026-04-21 10:00:00','ACTIVE'),
-  (3, 'charlie', '123456', 'charlie@example.com', '13800000003', 'https://example.com/avatar/charlie.png', 'Xianlin', 'Dorm 5-118', 'ACTIVE', '2026-04-20 09:20:00', '2026-04-22 11:00:00','ACTIVE'),
-  (4, 'diana', '123456', 'diana@example.com', '13800000004', 'https://example.com/avatar/diana.png', 'Pukou', 'Dorm 2-315', 'ACTIVE', '2026-04-20 09:30:00', '2026-04-22 14:30:00','ACTIVE');
+  (1, 'alice', '123456', 'alice@example.com', '13800000001', 'https://example.com/avatar/alice.png', 'Xianlin', 'Dorm 1-201', 'ACTIVE', '2026-04-20 09:00:00', '2026-04-20 09:00:00'),
+  (2, 'bob', '123456', 'bob@example.com', '13800000002', 'https://example.com/avatar/bob.png', 'Gulou', 'Dorm 3-402', 'ACTIVE', '2026-04-20 09:10:00', '2026-04-21 10:00:00'),
+  (3, 'charlie', '123456', 'charlie@example.com', '13800000003', 'https://example.com/avatar/charlie.png', 'Xianlin', 'Dorm 5-118', 'ACTIVE', '2026-04-20 09:20:00', '2026-04-22 11:00:00'),
+  (4, 'diana', '123456', 'diana@example.com', '13800000004', 'https://example.com/avatar/diana.png', 'Pukou', 'Dorm 2-315', 'ACTIVE', '2026-04-20 09:30:00', '2026-04-22 14:30:00');
 
 INSERT INTO admin (
   admin_id, username, password, role, created_at
@@ -28,12 +28,12 @@ INSERT INTO admin (
   (2, 'auditor', '123456', 'CONTENT_ADMIN', '2026-04-20 08:30:00');
 
 INSERT INTO good (
-  good_id, seller_id, title, description, price, category, status, `condition`, view_count, created_at, updated_at
+  good_id, seller_id, title, description, price, category, count, `condition`, view_count, created_at, updated_at
 ) VALUES
-  (1, 1, '二手高数教材', '同济版高等数学，上册有少量笔记。', 25.50, 'book', 'ON_SALE', 'USED_GOOD', 35, '2026-04-21 09:00:00', '2026-04-23 12:00:00'),
-  (2, 2, '机械键盘', '87 键青轴，带原装数据线。', 120.00, 'digital', 'ON_SALE', 'USED_GOOD', 62, '2026-04-21 10:00:00', '2026-04-24 15:20:00'),
-  (3, 3, '宿舍台灯', '亮度正常，适合晚自习使用。', 18.80, 'daily', 'SOLD', 'USED_FAIR', 17, '2026-04-21 11:00:00', '2026-04-25 09:40:00'),
-  (4, 1, '篮球', '七成新，适合日常训练。', 45.00, 'sports', 'ON_SALE', 'USED_GOOD', 29, '2026-04-21 14:00:00', '2026-04-25 18:10:00');
+  (1, 1, '二手高数教材', '同济版高等数学，上册有少量笔记。', 25.50, 'book', 3, 'USED_GOOD', 35, '2026-04-21 09:00:00', '2026-04-23 12:00:00'),
+  (2, 2, '机械键盘', '87 键青轴，带原装数据线。', 120.00, 'digital', 2, 'USED_GOOD', 62, '2026-04-21 10:00:00', '2026-04-24 15:20:00'),
+  (3, 3, '宿舍台灯', '亮度正常，适合晚自习使用。', 18.80, 'daily', 0, 'USED_FAIR', 17, '2026-04-21 11:00:00', '2026-04-25 09:40:00'),
+  (4, 1, '篮球', '七成新，适合日常训练。', 45.00, 'sports', 1, 'USED_GOOD', 29, '2026-04-21 14:00:00', '2026-04-25 18:10:00');
 
 INSERT INTO `order` (
   order_id, buyer_id, seller_id, order_number, total_amount, status, created_at, updated_at
@@ -84,3 +84,4 @@ INSERT INTO order_item (
   (1, 1, 1, 1, 25.50, 25.50),
   (2, 2, 3, 1, 18.80, 18.80),
   (3, 3, 2, 1, 120.00, 120.00);
+

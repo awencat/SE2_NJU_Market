@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchPage } from '../api'
@@ -28,7 +28,7 @@ async function loadLatestGoods() {
     goods.value = records.map(item => ({
       title: item.title || '未命名商品',
       price: `¥${item.price || 0}`,
-      tag: item.campus || item.status || '待售',
+      tag: Number(item.count || 0) > 0 ? `库存 ${item.count}` : '已售罄',
       condition: item.condition || '二手',
       goodId: item.goodId || item.id,
       imageUrl: getImageUrl(item),
@@ -371,3 +371,4 @@ onMounted(() => {
   }
 }
 </style>
+

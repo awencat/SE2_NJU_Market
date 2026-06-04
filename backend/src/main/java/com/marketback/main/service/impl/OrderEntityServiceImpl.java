@@ -19,12 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.math.BigDecimal;
 
 @Service
 public class OrderEntityServiceImpl extends ServiceImpl<OrderEntityMapper, OrderEntity> implements OrderEntityService {
 
-    private static final String STATUS_ON_SALE = "ON_SALE";
-    private static final String STATUS_RESERVED = "RESERVED";
     private static final String STATUS_PENDING = "PENDING";
 
     private final GoodService goodService;
@@ -52,8 +51,13 @@ public class OrderEntityServiceImpl extends ServiceImpl<OrderEntityMapper, Order
         if (request.getBuyerId().equals(good.getSellerId())) {
             throw new IllegalArgumentException("buyer cannot purchase own good");
         }
-        if (good.getStatus() != null && !STATUS_ON_SALE.equals(good.getStatus())) {
-            throw new IllegalArgumentException("good is not available");
+        Integer currentCount = good.getCount() == null ? 0 : good.getCount();
+        Integer purchaseCount = request.getCount();
+        if (currentCount <= 0) {
+            throw new IllegalArgumentException("good is sold out");
+        }
+        if (purchaseCount > currentCount) {
+            throw new IllegalArgumentException("purchase count exceeds remaining stock");
         }
 
         User seller = userService.getById(good.getSellerId());
@@ -65,19 +69,20 @@ public class OrderEntityServiceImpl extends ServiceImpl<OrderEntityMapper, Order
         order.setBuyerId(request.getBuyerId());
         order.setSellerId(good.getSellerId());
         order.setOrderNumber(generateOrderNumber());
-        order.setTotalAmount(good.getPrice());
+        BigDecimal totalAmount = good.getPrice().multiply(BigDecimal.valueOf(purchaseCount));
+        order.setTotalAmount(totalAmount);
         order.setStatus(STATUS_PENDING);
         save(order);
 
         OrderItem item = new OrderItem();
         item.setOrderId(order.getOrderId());
         item.setGoodId(good.getGoodId());
-        item.setQuantity(1);
+        item.setQuantity(purchaseCount);
         item.setUnitPrice(good.getPrice());
-        item.setSubtotal(good.getPrice());
+        item.setSubtotal(totalAmount);
         orderItemService.save(item);
 
-        good.setStatus(STATUS_RESERVED);
+        good.setCount(currentCount - purchaseCount);
         goodService.updateById(good);
 
         return new PurchaseResponse(
@@ -86,6 +91,7 @@ public class OrderEntityServiceImpl extends ServiceImpl<OrderEntityMapper, Order
                 order.getStatus(),
                 good.getGoodId(),
                 good.getTitle(),
+                purchaseCount,
                 order.getTotalAmount(),
                 seller.getUserId(),
                 seller.getUsername(),
@@ -112,7 +118,9 @@ public class OrderEntityServiceImpl extends ServiceImpl<OrderEntityMapper, Order
         for (OrderItem item : items) {
             Good good = goodService.getById(item.getGoodId());
             if (good != null) {
-                good.setStatus(STATUS_ON_SALE);
+                int currentCount = good.getCount() == null ? 0 : good.getCount();
+                int returnCount = item.getQuantity() == null ? 0 : item.getQuantity();
+                good.setCount(currentCount + returnCount);
                 goodService.updateById(good);
             }
         }
@@ -130,16 +138,37 @@ public class OrderEntityServiceImpl extends ServiceImpl<OrderEntityMapper, Order
 
     @Override
     public List<OrderEntity> listBySeller(Integer sellerId) {
-        return list(new LambdaQueryWrapper<OrderEntity>()
+        List<OrderEntity> orders = list(new LambdaQueryWrapper<OrderEntity>()
                 .eq(OrderEntity::getSellerId, sellerId)
                 .orderByDesc(OrderEntity::getCreatedAt));
+        fillOrderItems(orders);
+        return orders;
     }
 
     @Override
     public List<OrderEntity> listByBuyer(Integer buyerId) {
-        return list(new LambdaQueryWrapper<OrderEntity>()
+        List<OrderEntity> orders = list(new LambdaQueryWrapper<OrderEntity>()
                 .eq(OrderEntity::getBuyerId, buyerId)
                 .orderByDesc(OrderEntity::getCreatedAt));
+        fillOrderItems(orders);
+        return orders;
+    }
+
+    private void fillOrderItems(List<OrderEntity> orders) {
+        if (orders == null || orders.isEmpty()) {
+            return;
+        }
+        List<Integer> orderIds = orders.stream()
+                .map(OrderEntity::getOrderId)
+                .toList();
+        List<OrderItem> items = orderItemService.list(
+                new LambdaQueryWrapper<OrderItem>().in(OrderItem::getOrderId, orderIds)
+        );
+        for (OrderEntity order : orders) {
+            order.setItems(items.stream()
+                    .filter(item -> order.getOrderId().equals(item.getOrderId()))
+                    .toList());
+        }
     }
 
     private String generateOrderNumber() {

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -60,6 +60,12 @@ function canCancel(order) {
   return order.status !== 'CANCELLED' && order.status !== 'COMPLETED'
 }
 
+function formatOrderQuantity(order) {
+  const items = Array.isArray(order.items) ? order.items : []
+  if (items.length === 0) return 0
+  return items.reduce((sum, item) => sum + Number(item.quantity || 0), 0)
+}
+
 function formatMoney(value) {
   return `￥${Number(value || 0).toFixed(2)}`
 }
@@ -89,6 +95,9 @@ onMounted(async () => {
           <el-table :data="buyerOrders" empty-text="暂无订购记录" border>
             <el-table-column prop="orderNumber" label="订单号" min-width="180" />
             <el-table-column prop="sellerId" label="卖家ID" width="90" />
+            <el-table-column label="数量" width="80">
+              <template #default="scope">{{ formatOrderQuantity(scope.row) }}</template>
+            </el-table-column>
             <el-table-column label="金额" width="110">
               <template #default="scope">{{ formatMoney(scope.row.totalAmount) }}</template>
             </el-table-column>
@@ -114,6 +123,9 @@ onMounted(async () => {
           <el-table :data="sellerOrders" empty-text="暂无买家订购你的商品" border>
             <el-table-column prop="orderNumber" label="订单号" min-width="180" />
             <el-table-column prop="buyerId" label="买家ID" width="90" />
+            <el-table-column label="数量" width="80">
+              <template #default="scope">{{ formatOrderQuantity(scope.row) }}</template>
+            </el-table-column>
             <el-table-column label="金额" width="110">
               <template #default="scope">{{ formatMoney(scope.row.totalAmount) }}</template>
             </el-table-column>
@@ -136,3 +148,4 @@ onMounted(async () => {
 <style scoped>
 
 </style>
+

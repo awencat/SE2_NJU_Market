@@ -14,6 +14,7 @@ public class PurchaseResponse {
     private String status;
     private Integer goodId;
     private String goodTitle;
+    private Integer count;
     private BigDecimal totalAmount;
     private Integer sellerId;
     private String sellerName;

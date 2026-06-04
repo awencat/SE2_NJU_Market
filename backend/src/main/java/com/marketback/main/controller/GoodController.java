@@ -39,7 +39,6 @@ public class GoodController extends BaseCrudController<Good> {
         String title = (String) param.get("title");
         String category = (String) param.get("category");
         Integer sellerId = (Integer) param.get("sellerId");
-        String status = (String) param.get("status");
 
         Page<Good> page = new Page<>(query.getPageNum(), query.getPageSize());
 
@@ -59,10 +58,6 @@ public class GoodController extends BaseCrudController<Good> {
 
         if (sellerId != null && sellerId > 0) {
             wrapper.eq(Good::getSellerId, sellerId);
-        }
-
-        if (StringUtils.isNotBlank(status) && !"null".equals(status)) {
-            wrapper.eq(Good::getStatus, status);
         }
 
         IPage<Good> result = goodService.page(page, wrapper);

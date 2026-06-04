@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS good (
   description TEXT,
   price DECIMAL(10, 2) NOT NULL,
   category VARCHAR(100),
-  status VARCHAR(50),
+  count INT NOT NULL DEFAULT 1,
   `condition` VARCHAR(50),
   view_count INT DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
