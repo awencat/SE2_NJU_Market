@@ -150,9 +150,20 @@ onMounted(loadLatestGoods)
         </div>
         <el-button text @click="router.push('/DailyShop')">查看全部</el-button>
       </div>
-      <div v-loading="loading" class="goods-showcase">
-        <article v-if="!loading && goods.length === 0" class="empty-card">暂无商品</article>
+      <div class="goods-showcase">
+        <template v-if="loading">
+          <article v-for="item in 4" :key="`skeleton-${item}`" class="good-card good-skeleton" :class="{ featured: item === 1 }">
+            <div class="skeleton-cover"></div>
+            <div class="skeleton-info">
+              <i class="skeleton-line title"></i>
+              <i class="skeleton-line short"></i>
+              <i class="skeleton-line bottom"></i>
+            </div>
+          </article>
+        </template>
+        <article v-else-if="goods.length === 0" class="empty-card">暂无商品</article>
         <article
+          v-else
           v-for="(item, index) in goods"
           :key="item.goodId || item.id"
           class="good-card"
@@ -251,6 +262,15 @@ onMounted(loadLatestGoods)
 .good-card.featured h3 { font-family: var(--market-display); font-size: 23px; min-height: auto; }
 .good-card.featured .good-info strong { font-size: 26px; }
 .good-card:hover { transform: translateY(-4px); box-shadow: 0 18px 36px rgba(50,38,25,.13); }
+.good-skeleton { cursor: default; pointer-events: none; }
+.good-skeleton:hover { transform: none; box-shadow: none; }
+.skeleton-cover { height: 168px; background: linear-gradient(90deg, rgba(229,218,200,.7), rgba(255,250,241,.92), rgba(229,218,200,.7)); background-size: 220% 100%; animation: skeleton-shine 1.2s ease-in-out infinite; }
+.good-card.featured .skeleton-cover { height: 218px; }
+.skeleton-info { display: grid; align-content: start; gap: 12px; padding: 16px; }
+.skeleton-line { display: block; height: 13px; border-radius: 999px; background: linear-gradient(90deg, rgba(84,67,45,.12), rgba(255,255,255,.7), rgba(84,67,45,.12)); background-size: 220% 100%; animation: skeleton-shine 1.2s ease-in-out infinite; }
+.skeleton-line.title { width: 76%; height: 18px; }
+.skeleton-line.short { width: 46%; }
+.skeleton-line.bottom { width: 62%; margin-top: 26px; }
 .good-image { height: 168px; display: grid; place-items: center; background: linear-gradient(135deg, #e5dac8, #d5b47b); color: var(--market-green); font-family: var(--market-display); font-size: 28px; font-weight: 900; overflow: hidden; }
 .good-image img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .3s ease; }
 .good-card:hover img { transform: scale(1.04); }
@@ -263,6 +283,7 @@ onMounted(loadLatestGoods)
 .good-info span { color: var(--market-muted); font-size: 13px; }
 .empty-card { grid-column: 1 / -1; min-height: 170px; display: grid; place-items: center; border: 1px dashed var(--market-line); border-radius: 18px; color: var(--market-muted); }
 @keyframes page-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes skeleton-shine { 0% { background-position: 120% 0; } 100% { background-position: -120% 0; } }
 @media (max-width: 980px) { .hero-layout, .category-ribbon, .goods-showcase { grid-template-columns: 1fr 1fr; } .good-card.featured { grid-column: 1 / -1; } }
 @media (max-width: 640px) { .hero-layout, .category-ribbon, .goods-showcase, .hero-metrics { grid-template-columns: 1fr; } .hero-copy { min-height: auto; padding: 30px; } .hero-photo { min-height: 280px; } .page-art, .floating-goods { display: none; } .good-card.featured { grid-column: auto; } }
 </style>

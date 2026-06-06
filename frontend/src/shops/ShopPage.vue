@@ -219,8 +219,19 @@ onMounted(loadPost)
       </div>
     </section>
 
-    <section v-loading="loading" class="product-area">
-      <div v-if="hasProducts" class="products-grid">
+    <section class="product-area">
+      <div v-if="loading" class="products-grid skeleton-grid" aria-label="商品加载中">
+        <article v-for="item in 6" :key="item" class="product-card product-skeleton">
+          <div class="skeleton-cover"></div>
+          <div class="skeleton-body">
+            <i class="skeleton-line title"></i>
+            <i class="skeleton-line short"></i>
+            <i class="skeleton-line"></i>
+            <i class="skeleton-line bottom"></i>
+          </div>
+        </article>
+      </div>
+      <div v-else-if="hasProducts" class="products-grid">
         <article
           v-for="product in filteredProducts"
           :key="getGoodId(product)"
@@ -263,7 +274,7 @@ onMounted(loadPost)
       <el-empty v-else :description="emptyText">
         <el-button type="primary" @click="resetParam">重新加载</el-button>
       </el-empty>
-      <div v-if="hasProducts" class="pagination-section">
+      <div v-if="!loading && hasProducts" class="pagination-section">
         <el-pagination
           v-model:current-page="pageNum"
           v-model:page-size="pageSize"
@@ -306,6 +317,14 @@ onMounted(loadPost)
 .products-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
 .product-card { min-height: 350px; display: grid; grid-template-rows: 188px 1fr; overflow: hidden; border: 1px solid var(--market-line); border-radius: 18px; background: rgba(255,250,241,.88); cursor: pointer; transition: .18s ease; box-shadow: 0 12px 28px rgba(50,38,25,.08); animation: rise .28s ease both; }
 .product-card:hover { transform: translateY(-4px); border-color: var(--shop-accent); box-shadow: 0 18px 38px rgba(50,38,25,.14); }
+.product-skeleton { cursor: default; pointer-events: none; }
+.product-skeleton:hover { transform: none; border-color: var(--market-line); box-shadow: 0 12px 28px rgba(50,38,25,.08); }
+.skeleton-cover { height: 188px; background: linear-gradient(90deg, rgba(229,218,200,.7), rgba(255,250,241,.9), rgba(229,218,200,.7)); background-size: 220% 100%; animation: skeleton-shine 1.2s ease-in-out infinite; }
+.skeleton-body { display: grid; align-content: start; gap: 12px; padding: 16px; }
+.skeleton-line { display: block; height: 13px; border-radius: 999px; background: linear-gradient(90deg, rgba(84,67,45,.12), rgba(255,255,255,.68), rgba(84,67,45,.12)); background-size: 220% 100%; animation: skeleton-shine 1.2s ease-in-out infinite; }
+.skeleton-line.title { width: 74%; height: 18px; }
+.skeleton-line.short { width: 48%; }
+.skeleton-line.bottom { width: 62%; margin-top: 34px; }
 .image-wrap { position: relative; height: 188px; background: #e5dac8; overflow: hidden; }
 .image-wrap img, .image-empty { width: 100%; height: 100%; }
 .image-wrap img { display: block; object-fit: cover; transition: transform .3s ease; }
@@ -328,6 +347,7 @@ onMounted(loadPost)
 .seller-row span { min-width: 0; gap: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pagination-section { display: flex; justify-content: center; padding: 26px 0 0; }
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes skeleton-shine { 0% { background-position: 120% 0; } 100% { background-position: -120% 0; } }
 @media (max-width:1080px) { .products-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (max-width:820px) { .shop-hero, .search-panel { grid-template-columns: 1fr; } .filter-strip { align-items: flex-start; flex-direction: column; } .products-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (max-width:560px) { .products-grid { grid-template-columns: 1fr; } }

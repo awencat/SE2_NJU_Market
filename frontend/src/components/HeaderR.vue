@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowRight, Box, House, Setting, Shop, User } from '@element-plus/icons-vue'
+import { Box, House, Setting, Shop, User } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -57,7 +57,9 @@ async function logout() {
 <template>
   <header class="market-header">
     <button class="brand" type="button" @click="go('/FrontPage')">
-      <span class="brand-mark">N</span>
+      <span class="brand-mark" aria-hidden="true">
+        <i></i>
+      </span>
       <span>
         <strong>NJU Market</strong>
         <small>校园二手交易</small>
@@ -97,12 +99,26 @@ async function logout() {
       <el-avatar v-else :size="36">{{ displayName().slice(0, 1).toUpperCase() }}</el-avatar>
       <el-button class="logout" plain @click="logout">
         退出
-        <el-icon><ArrowRight /></el-icon>
       </el-button>
     </div>
   </header>
 </template>
 
 <style scoped>
-.market-header{position:sticky;top:0;z-index:20;min-height:72px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:18px;padding:10px max(18px,calc((100vw - 1180px)/2));border-bottom:1px solid rgba(36,48,45,.1);background:rgba(255,250,241,.9);backdrop-filter:blur(18px)}.brand{display:flex;align-items:center;gap:10px;padding:0;background:transparent;color:#24302d;text-align:left}.brand-mark{width:42px;height:42px;display:grid;place-items:center;border-radius:9px;background:#2f6258;color:#fffaf1;font-weight:900;font-size:22px;box-shadow:0 10px 22px rgba(47,98,88,.22)}.brand strong,.brand small{display:block;white-space:nowrap}.brand strong{font-size:17px;line-height:1.1}.brand small{margin-top:3px;color:#72807b;font-size:12px}.nav-menu{min-width:0;border-bottom:0;justify-content:center}.header-user{display:flex;align-items:center;gap:10px;min-width:0}.welcome{max-width:110px;color:#40504c;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.logout{height:34px;border-radius:8px;color:#40504c;background:#fffaf1}@media(max-width:980px){.market-header{grid-template-columns:1fr;gap:8px;padding:10px 14px}.nav-menu{justify-content:flex-start;overflow-x:auto}.header-user{justify-content:flex-end}}
+.market-header{position:sticky;top:0;z-index:20;min-height:76px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:18px;padding:10px max(18px,calc((100vw - 1180px)/2));border-bottom:1px solid rgba(36,48,45,.1);background:linear-gradient(90deg,rgba(255,250,241,.94),rgba(246,238,225,.88));backdrop-filter:blur(18px);box-shadow:0 12px 30px rgba(50,38,25,.07)}
+.market-header::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(circle at 12% 20%,rgba(47,98,88,.1),transparent 22%),radial-gradient(circle at 84% 8%,rgba(194,122,44,.12),transparent 18%),repeating-linear-gradient(135deg,rgba(33,44,41,.026) 0,rgba(33,44,41,.026) 1px,transparent 1px,transparent 22px)}
+.brand{display:flex;align-items:center;gap:10px;padding:0;background:transparent;color:#24302d;text-align:left}
+.brand-mark{position:relative;width:44px;height:44px;display:grid;place-items:center;border-radius:12px;background:#24302d;box-shadow:0 10px 22px rgba(47,98,88,.22)}
+.brand-mark::before{content:"";position:absolute;left:12px;top:10px;width:20px;height:14px;border:3px solid #c27a2c;border-bottom:0;border-radius:14px 14px 0 0}
+.brand-mark i{position:absolute;left:10px;top:22px;width:24px;height:15px;border-radius:3px;background:#fffaf1}
+.brand-mark i::after{content:"";position:absolute;right:-3px;top:5px;width:8px;height:8px;border-radius:2px;background:#b34b34}
+.brand strong,.brand small{display:block;white-space:nowrap}.brand strong{font-size:17px;line-height:1.1}.brand small{margin-top:3px;color:#72807b;font-size:12px}
+.nav-menu{min-width:0;border-bottom:0;justify-content:center;background:rgba(255,250,241,.36);border-radius:16px}
+.nav-menu :deep(.el-menu-item),.nav-menu :deep(.el-sub-menu__title){height:44px;border-radius:12px}
+.nav-menu :deep(.el-menu-item.is-active),.nav-menu :deep(.el-sub-menu.is-active .el-sub-menu__title){background:rgba(47,98,88,.1)}
+.header-user{display:flex;align-items:center;gap:10px;min-width:0;padding:6px 8px 6px 12px;border:1px solid rgba(84,67,45,.12);border-radius:999px;background:rgba(255,250,241,.62)}
+.welcome{max-width:110px;color:#40504c;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.logout{height:34px;border-radius:999px;color:#40504c;background:#fffaf1}
+.logout:hover{color:#fffaf1;background:#2f6258;border-color:#2f6258}
+@media(max-width:980px){.market-header{grid-template-columns:1fr;gap:8px;padding:10px 14px}.nav-menu{justify-content:flex-start;overflow-x:auto}.header-user{justify-content:flex-end;justify-self:end}}
 </style>

@@ -2,8 +2,13 @@
   <transition name="loading-fade" @after-leave="onTransitionEnd">
     <div id="loading" v-if="visible">
       <div class="loading-content">
-        <img src="/loading-logo.png" alt="Loading" class="loading-logo" />
-        <div class="loading-text">加载中...</div>
+        <div class="loading-mark">
+          <span>N</span>
+        </div>
+        <div class="loading-copy">
+          <strong>NJU Market</strong>
+          <span>正在加载</span>
+        </div>
       </div>
     </div>
   </transition>
@@ -54,11 +59,13 @@ export default {
 <style scoped>
 #loading {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #fff9f0 0%, #ffe4cc 100%);
+  background:
+    radial-gradient(circle at 30% 24%, rgba(194, 122, 44, .22), transparent 26%),
+    radial-gradient(circle at 72% 74%, rgba(47, 98, 88, .2), transparent 28%),
+    linear-gradient(135deg, #fff9ec 0%, #f2eadf 100%);
   z-index: 9999;
   display: flex;
   justify-content: center;
@@ -69,52 +76,54 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 30px;
+  gap: 18px;
+  padding: 30px 34px;
+  border: 1px solid rgba(84, 67, 45, .18);
+  border-radius: 24px;
+  background: rgba(255, 252, 245, .76);
+  box-shadow: 0 22px 54px rgba(50, 38, 25, .14);
+  backdrop-filter: blur(18px);
 }
 
-.loading-logo {
-  width: 150px;
-  height: 150px;
-  object-fit: contain;
-  animation: logoSpin 2s linear infinite, logoPulse 1.5s ease-in-out infinite;
-  filter: drop-shadow(0 4px 12px rgba(255, 154, 60, 0.3));
+.loading-mark {
+  width: 78px;
+  height: 78px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: #2f6258;
+  color: #fffaf1;
+  box-shadow: 0 16px 34px rgba(47, 98, 88, .26);
+  animation: markFloat 1.6s ease-in-out infinite;
 }
 
-.loading-text {
+.loading-mark span {
+  font-size: 42px;
+  line-height: 1;
+  font-family: Georgia, Cambria, serif;
+  font-weight: 900;
+}
+
+.loading-copy {
+  display: grid;
+  gap: 5px;
+  text-align: center;
+}
+
+.loading-copy strong {
+  color: #212c29;
   font-size: 20px;
-  color: #ff8c2e;
-  font-weight: 600;
-  letter-spacing: 3px;
-  animation: textPulse 1.5s ease-in-out infinite;
 }
 
-@keyframes logoSpin {
-  0% {
-    transform: rotateY(0deg);
-  }
-  100% {
-    transform: rotateY(360deg);
-  }
+.loading-copy span {
+  color: #65726e;
+  font-size: 14px;
+  letter-spacing: .08em;
 }
 
-@keyframes logoPulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
-
-@keyframes textPulse {
-  0%, 100% {
-    opacity: 0.6;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.05);
-  }
+@keyframes markFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
 
 .loading-fade-enter-active,
