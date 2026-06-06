@@ -1,27 +1,16 @@
 <template>
   <div id="app">
     <Loading />
-    <router-view/>
+    <router-view />
   </div>
 </template>
 
-<script>
+<script setup>
 import Loading from './components/Loading.vue'
-
-export default {
-  name: 'App',
-  components: {
-    Loading
-  }
-}
 </script>
 
 <style>
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
 }
 </style>
-
-

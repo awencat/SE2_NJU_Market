@@ -39,6 +39,13 @@ public class OrderEntityController extends BaseCrudController<OrderEntity> {
         return ApiResponse.success("cancelled", orderEntityService.cancel(orderId, buyerId));
     }
 
+    @PostMapping("/{orderId}/complete")
+    public ApiResponse<OrderEntity> complete(
+            @PathVariable Integer orderId,
+            @RequestParam(value = "sellerId", required = false) Integer sellerId) {
+        return ApiResponse.success("completed", orderEntityService.complete(orderId, sellerId));
+    }
+
     @GetMapping("/seller/{sellerId}")
     public ApiResponse<List<OrderEntity>> listBySeller(@PathVariable Integer sellerId) {
         return ApiResponse.success(orderEntityService.listBySeller(sellerId));

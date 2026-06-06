@@ -32,6 +32,18 @@ public class GoodController extends BaseCrudController<Good> {
         this.goodImageService = goodImageService;
     }
 
+    @PostMapping
+    public ApiResponse<Good> create(@RequestBody Good good) {
+        normalizeCategory(good);
+        return super.create(good);
+    }
+
+    @PutMapping("/{id}")
+    public ApiResponse<Good> update(@PathVariable Integer id, @RequestBody Good good) {
+        normalizeCategory(good);
+        return super.update(id, good);
+    }
+
     @PostMapping("/listPage")
     public ApiResponse<Map<String, Object>> listPage(@RequestBody QueryPageParam query) {
         Map<String, Object> param = query.getParam();
@@ -49,7 +61,7 @@ public class GoodController extends BaseCrudController<Good> {
         }
 
         if (StringUtils.isNotBlank(category) && !"null".equals(category)) {
-            wrapper.eq(Good::getCategory, category);
+            wrapper.in(Good::getCategory, categoryAliases(category));
         }
 
         if (goodId != null) {
@@ -59,6 +71,7 @@ public class GoodController extends BaseCrudController<Good> {
         if (sellerId != null && sellerId > 0) {
             wrapper.eq(Good::getSellerId, sellerId);
         }
+        wrapper.orderByDesc(Good::getCreatedAt);
 
         IPage<Good> result = goodService.page(page, wrapper);
         List<Good> records = result.getRecords();
@@ -103,6 +116,50 @@ public class GoodController extends BaseCrudController<Good> {
         response.put("size", result.getSize());
 
         return ApiResponse.success(response);
+    }
+
+    private List<String> categoryAliases(String category) {
+        Map<String, List<String>> aliases = Map.of(
+                "daily", List.of("daily", "DAILY", "日用百货", "日用商城"),
+                "digital", List.of("digital", "DIGITAL", "数码设备", "数码商城"),
+                "book", List.of("book", "BOOK", "教材书刊", "书刊", "书刊商城", "图书"),
+                "sports", List.of("sports", "SPORTS", "体育用品", "体育商城"),
+                "pet", List.of("pet", "PET", "宠物用品", "宠物商城")
+        );
+        return aliases.getOrDefault(normalizeCategoryValue(category), List.of(category));
+    }
+
+    private void normalizeCategory(Good good) {
+        if (good != null) {
+            good.setCategory(normalizeCategoryValue(good.getCategory()));
+        }
+    }
+
+    private String normalizeCategoryValue(String category) {
+        if (category == null) {
+            return null;
+        }
+        String value = category.trim();
+        Map<String, String> normalized = Map.ofEntries(
+                Map.entry("DAILY", "daily"),
+                Map.entry("日用百货", "daily"),
+                Map.entry("日用商城", "daily"),
+                Map.entry("DIGITAL", "digital"),
+                Map.entry("数码设备", "digital"),
+                Map.entry("数码商城", "digital"),
+                Map.entry("BOOK", "book"),
+                Map.entry("教材书刊", "book"),
+                Map.entry("书刊", "book"),
+                Map.entry("书刊商城", "book"),
+                Map.entry("图书", "book"),
+                Map.entry("SPORTS", "sports"),
+                Map.entry("体育用品", "sports"),
+                Map.entry("体育商城", "sports"),
+                Map.entry("PET", "pet"),
+                Map.entry("宠物用品", "pet"),
+                Map.entry("宠物商城", "pet")
+        );
+        return normalized.getOrDefault(value, value.toLowerCase(Locale.ROOT));
     }
 }
 

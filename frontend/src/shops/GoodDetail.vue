@@ -36,6 +36,8 @@ const comments = ref([])
 const ratings = ref([])
 const ratingSummary = ref({ averageScore: 0, ratingCount: 0 })
 const commentContent = ref('')
+const replyContent = ref('')
+const replyingTo = ref(null)
 const ratingScore = ref(5)
 const reportReason = ref('')
 const activeTab = ref('comments')
@@ -62,6 +64,7 @@ const imageUrls = computed(() => {
 })
 
 const currentImageUrl = computed(() => imageUrls.value[currentImageIndex.value] || '')
+const topLevelComments = computed(() => comments.value.filter((comment) => !comment.parentCommentId))
 
 function readCurrentUser() {
   const raw = localStorage.getItem('nju-market-user') || sessionStorage.getItem('User')
@@ -233,6 +236,46 @@ async function submitComment() {
     await loadFeedback()
   } catch (error) {
     ElMessage.error(error.message || '发布失败，只有购买过该商品的用户可以评论')
+  } finally {
+    submitting.value = false
+  }
+}
+
+function getReplies(commentId) {
+  return comments.value.filter((comment) => comment.parentCommentId === commentId)
+}
+
+function startReply(comment) {
+  replyingTo.value = comment.commentId
+  replyContent.value = ''
+}
+
+function cancelReply() {
+  replyingTo.value = null
+  replyContent.value = ''
+}
+
+async function submitReply(comment) {
+  const userId = requireLogin()
+  if (!userId) return
+  if (!replyContent.value.trim()) {
+    ElMessage.warning('请输入回复内容')
+    return
+  }
+
+  submitting.value = true
+  try {
+    await createRecord('comments', {
+      userId,
+      goodId: goodId.value,
+      parentCommentId: comment.commentId,
+      content: replyContent.value.trim(),
+    })
+    ElMessage.success('回复已发布')
+    cancelReply()
+    await loadFeedback()
+  } catch (error) {
+    ElMessage.error(error.message || '回复失败，只有购买过该商品的用户可以回复')
   } finally {
     submitting.value = false
   }
@@ -418,13 +461,39 @@ onMounted(loadPage)
               </div>
 
               <div class="comment-list">
-                <el-empty v-if="comments.length === 0" description="暂无评论" :image-size="80" />
-                <article v-for="comment in comments" :key="comment.commentId" class="comment-item">
+                <el-empty v-if="topLevelComments.length === 0" description="暂无评论" :image-size="80" />
+                <article v-for="comment in topLevelComments" :key="comment.commentId" class="comment-item">
                   <div>
                     <strong>用户 {{ comment.userId }}</strong>
                     <time>{{ formatTime(comment.createdAt) }}</time>
                   </div>
                   <p>{{ comment.content }}</p>
+                  <button class="reply-link" type="button" @click="startReply(comment)">回复</button>
+                  <div v-if="getReplies(comment.commentId).length > 0" class="reply-list">
+                    <div v-for="reply in getReplies(comment.commentId)" :key="reply.commentId" class="reply-item">
+                      <div>
+                        <strong>用户 {{ reply.userId }}</strong>
+                        <time>{{ formatTime(reply.createdAt) }}</time>
+                      </div>
+                      <p>{{ reply.content }}</p>
+                    </div>
+                  </div>
+                  <div v-if="replyingTo === comment.commentId" class="reply-box">
+                    <el-input
+                      v-model="replyContent"
+                      type="textarea"
+                      :rows="3"
+                      maxlength="300"
+                      show-word-limit
+                      placeholder="回复这条评论"
+                    />
+                    <div>
+                      <el-button size="small" @click="cancelReply">取消</el-button>
+                      <el-button size="small" type="primary" :loading="submitting" @click="submitReply(comment)">
+                        发布回复
+                      </el-button>
+                    </div>
+                  </div>
                 </article>
               </div>
             </el-tab-pane>
@@ -491,9 +560,13 @@ onMounted(loadPage)
 <style scoped>
 .detail-page {
   min-height: 100vh;
-  padding: 22px 20px 48px;
-  background: #f6f3ee;
-  color: #26312f;
+  padding: 26px 20px 54px;
+  background:
+    linear-gradient(115deg, rgba(255,249,236,.86), rgba(242,234,223,.76)),
+    radial-gradient(circle at 8% 14%, rgba(194,122,44,.18), transparent 25%),
+    radial-gradient(circle at 88% 10%, rgba(65,106,143,.14), transparent 26%),
+    repeating-linear-gradient(135deg, rgba(33,44,41,.026) 0, rgba(33,44,41,.026) 1px, transparent 1px, transparent 20px);
+  color: var(--market-ink);
 }
 
 .back-button {
@@ -501,12 +574,14 @@ onMounted(loadPage)
   align-items: center;
   gap: 6px;
   margin: 0 auto 16px;
-  padding: 8px 12px;
-  border: 1px solid #d9cbbb;
-  border-radius: 8px;
-  background: #fffaf2;
-  color: #384642;
+  padding: 9px 13px;
+  border: 1px solid var(--market-line);
+  border-radius: 999px;
+  background: rgba(255,252,245,.82);
+  color: var(--market-ink);
   cursor: pointer;
+  box-shadow: 0 10px 24px rgba(50,38,25,.08);
+  backdrop-filter: blur(14px);
 }
 
 .detail-shell {
@@ -519,6 +594,7 @@ onMounted(loadPage)
   grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
   gap: 24px;
   align-items: stretch;
+  animation: detail-rise .32s ease both;
 }
 
 .image-panel,
@@ -526,8 +602,10 @@ onMounted(loadPage)
 .score-card,
 .feedback-panel {
   border: 1px solid #e0d3c3;
-  border-radius: 8px;
-  background: #fffdf8;
+  border-radius: 24px;
+  background: rgba(255,252,245,.86);
+  box-shadow: var(--market-shadow);
+  backdrop-filter: blur(14px);
 }
 
 .image-panel {
@@ -541,7 +619,9 @@ onMounted(loadPage)
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f1eadf;
+  background:
+    linear-gradient(135deg, rgba(47,98,88,.12), rgba(194,122,44,.13)),
+    #f1eadf;
 }
 
 .main-image-wrap img,
@@ -603,10 +683,10 @@ onMounted(loadPage)
 .thumbnail-row {
   display: flex;
   gap: 10px;
-  padding: 12px;
+  padding: 14px;
   overflow-x: auto;
-  border-top: 1px solid #e0d3c3;
-  background: #fffaf2;
+  border-top: 1px solid var(--market-line);
+  background: rgba(255,250,242,.82);
 }
 
 .thumbnail-button {
@@ -615,13 +695,13 @@ onMounted(loadPage)
   padding: 0;
   overflow: hidden;
   border: 2px solid transparent;
-  border-radius: 8px;
+  border-radius: 12px;
   background: #eadfce;
   cursor: pointer;
 }
 
 .thumbnail-button.active {
-  border-color: #2f5f58;
+  border-color: var(--market-green);
 }
 
 .thumbnail-button img {
@@ -633,10 +713,26 @@ onMounted(loadPage)
 }
 
 .info-panel {
-  padding: 28px;
+  position: relative;
+  overflow: hidden;
+  padding: 30px;
+}
+
+.info-panel::after {
+  content: "";
+  position: absolute;
+  right: -72px;
+  bottom: -82px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: rgba(47,98,88,.09);
+  pointer-events: none;
 }
 
 .title-row {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -649,14 +745,19 @@ onMounted(loadPage)
 }
 
 .info-panel h1 {
+  position: relative;
+  z-index: 1;
   margin: 0 0 12px;
-  font-size: 34px;
-  line-height: 1.18;
+  font-family: var(--market-display);
+  font-size: clamp(36px, 5vw, 58px);
+  line-height: 1.05;
 }
 
 .description {
+  position: relative;
+  z-index: 1;
   margin: 0 0 20px;
-  color: #68736f;
+  color: var(--market-muted);
   line-height: 1.7;
 }
 
@@ -665,30 +766,35 @@ onMounted(loadPage)
   align-items: center;
   gap: 8px;
   margin-bottom: 22px;
-  color: #b54716;
-  font-size: 30px;
-  font-weight: 800;
+  color: var(--market-red);
+  font-size: 34px;
+  font-weight: 900;
 }
 
 .seller-box {
+  position: relative;
+  z-index: 1;
   display: grid;
   gap: 8px;
   margin-bottom: 22px;
   padding: 16px;
-  background: #f7efe5;
-  border-radius: 8px;
+  border: 1px solid var(--market-line);
+  background: rgba(255,250,242,.78);
+  border-radius: 16px;
 }
 
 .purchase-count-box {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
   margin-bottom: 16px;
   padding: 14px 16px;
-  border: 1px solid #eadfce;
-  border-radius: 8px;
-  background: #fffaf2;
+  border: 1px solid var(--market-line);
+  border-radius: 16px;
+  background: rgba(255,250,242,.78);
 }
 
 .purchase-count-box span {
@@ -714,10 +820,13 @@ onMounted(loadPage)
 }
 
 .buy-button {
+  position: relative;
+  z-index: 1;
   width: 100%;
-  height: 44px;
-  background: #2f5f58;
-  border-color: #2f5f58;
+  height: 48px;
+  background: var(--market-green);
+  border-color: var(--market-green);
+  font-weight: 900;
 }
 
 .feedback-section {
@@ -725,12 +834,15 @@ onMounted(loadPage)
   grid-template-columns: 260px minmax(0, 1fr);
   gap: 22px;
   margin-top: 24px;
+  animation: detail-rise .38s ease both;
 }
 
 .score-card {
   height: fit-content;
   padding: 22px;
   text-align: center;
+  position: sticky;
+  top: 92px;
 }
 
 .score-card p {
@@ -741,8 +853,9 @@ onMounted(loadPage)
 .score-card strong {
   display: block;
   margin-bottom: 8px;
-  color: #b54716;
-  font-size: 42px;
+  color: var(--market-red);
+  font-family: var(--market-display);
+  font-size: 50px;
 }
 
 .score-card span {
@@ -754,7 +867,7 @@ onMounted(loadPage)
 .hint {
   margin-top: 18px;
   padding-top: 16px;
-  border-top: 1px solid #eadfce;
+  border-top: 1px solid var(--market-line);
   color: #7a695b;
   font-size: 13px;
   line-height: 1.6;
@@ -762,7 +875,7 @@ onMounted(loadPage)
 }
 
 .feedback-panel {
-  padding: 8px 22px 22px;
+  padding: 10px 22px 22px;
 }
 
 .submit-box,
@@ -786,9 +899,9 @@ onMounted(loadPage)
 .comment-item,
 .rating-item {
   padding: 14px;
-  border: 1px solid #eadfce;
-  border-radius: 8px;
-  background: #fffaf2;
+  border: 1px solid var(--market-line);
+  border-radius: 16px;
+  background: rgba(255,250,242,.84);
 }
 
 .comment-item div,
@@ -816,6 +929,61 @@ onMounted(loadPage)
   line-height: 1.65;
 }
 
+.reply-link {
+  width: max-content;
+  margin-top: 10px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(47,98,88,.1);
+  color: var(--market-green);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.reply-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding-left: 14px;
+  border-left: 3px solid rgba(47,98,88,.18);
+}
+
+.reply-item {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255,252,245,.78);
+  box-shadow: inset 0 0 0 1px rgba(84,67,45,.12);
+}
+
+.reply-item div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.reply-item p {
+  margin: 8px 0 0;
+  color: #4f5a56;
+  line-height: 1.6;
+}
+
+.reply-box {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255,252,245,.86);
+  box-shadow: inset 0 0 0 1px rgba(84,67,45,.12);
+}
+
+.reply-box div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .rating-submit {
   display: flex;
   align-items: center;
@@ -825,6 +993,11 @@ onMounted(loadPage)
   border: 1px solid #eadfce;
   border-radius: 8px;
   background: #fffaf2;
+}
+
+@keyframes detail-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .report-title {

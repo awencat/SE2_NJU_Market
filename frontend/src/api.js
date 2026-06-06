@@ -120,6 +120,13 @@ export function cancelOrder(orderId, buyerId) {
   })
 }
 
+export function completeOrder(orderId, sellerId) {
+  const query = sellerId ? `?sellerId=${encodeURIComponent(sellerId)}` : ''
+  return request(`/orders/${orderId}/complete${query}`, {
+    method: 'POST',
+  })
+}
+
 export function fetchSellerOrders(sellerId) {
   return request(`/orders/seller/${sellerId}`)
 }

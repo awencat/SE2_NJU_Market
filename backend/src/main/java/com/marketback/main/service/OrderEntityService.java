@@ -13,6 +13,8 @@ public interface OrderEntityService extends IService<OrderEntity> {
 
     OrderEntity cancel(Integer orderId, Integer buyerId);
 
+    OrderEntity complete(Integer orderId, Integer sellerId);
+
     List<OrderEntity> listBySeller(Integer sellerId);
 
     List<OrderEntity> listByBuyer(Integer buyerId);

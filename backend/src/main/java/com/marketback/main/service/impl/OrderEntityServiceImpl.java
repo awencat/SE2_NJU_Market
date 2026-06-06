@@ -25,6 +25,8 @@ import java.math.BigDecimal;
 public class OrderEntityServiceImpl extends ServiceImpl<OrderEntityMapper, OrderEntity> implements OrderEntityService {
 
     private static final String STATUS_PENDING = "PENDING";
+    private static final String STATUS_COMPLETED = "COMPLETED";
+    private static final String STATUS_CANCELLED = "CANCELLED";
 
     private final GoodService goodService;
     private final OrderItemService orderItemService;
@@ -140,6 +142,31 @@ public class OrderEntityServiceImpl extends ServiceImpl<OrderEntityMapper, Order
             throw new IllegalArgumentException("order cancel failed");
         }
 
+        return order;
+    }
+
+    @Override
+    @Transactional
+    public OrderEntity complete(Integer orderId, Integer sellerId) {
+        OrderEntity order = getById(orderId);
+        if (order == null) {
+            throw new IllegalArgumentException("order not found");
+        }
+        if (sellerId != null && !sellerId.equals(order.getSellerId())) {
+            throw new IllegalArgumentException("only seller can complete this order");
+        }
+        if (STATUS_COMPLETED.equals(order.getStatus())) {
+            return order;
+        }
+        if (STATUS_CANCELLED.equals(order.getStatus())) {
+            throw new IllegalArgumentException("cancelled order cannot be completed");
+        }
+
+        order.setStatus(STATUS_COMPLETED);
+        if (!updateById(order)) {
+            throw new IllegalArgumentException("order complete failed");
+        }
+        fillOrderItems(List.of(order));
         return order;
     }
 
